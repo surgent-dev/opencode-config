@@ -7,7 +7,7 @@ Usage:
   setup-opencode-config.sh <repo-url> [--target DIR] [--no-rc] [--disable-local]
 
 Options:
-  --target DIR      Local checkout path (default: $OPENCODE_CONFIG_DIR or ~/.local/share/opencode-config)
+  --target DIR      Local checkout path (default: $OPENCODE_CONFIG_DIR or ~/opencode-config)
   --no-rc           Do not modify shell rc file
   --disable-local   Rename ./packages/opencode/.opencode to avoid local overrides
 
@@ -18,7 +18,7 @@ USAGE
 }
 
 REPO_URL="${OPENCODE_CONFIG_REPO:-}"
-TARGET_DIR="${OPENCODE_CONFIG_DIR:-$HOME/.local/share/opencode-config}"
+TARGET_DIR="${OPENCODE_CONFIG_DIR:-$HOME/opencode-config}"
 UPDATE_RC="true"
 DISABLE_LOCAL="false"
 
