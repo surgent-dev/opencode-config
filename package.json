@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "@opencode-ai/plugin": "1.0.220",
+    "dotenv": "^17.2.3"
+  }
+}
