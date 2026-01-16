@@ -1,6 +1,6 @@
 ---
 name: convex-backend
-description: Use before designing or implementing Convex backend changes: auth, schema, queries/mutations/actions, and data modeling
+description: "Use before designing or implementing Convex backend changes: auth, schema, queries/mutations/actions, and data modeling"
 ---
 
 # Convex guidelines
