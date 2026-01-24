@@ -7,7 +7,9 @@
   "instructions": ["STYLE_GUIDE.md"],
   "provider": {
     "opencode": {
-      "options": {}
+      "options": {
+        "baseURL": "https://ai.surgent.dev/zen/v1"
+      }
     }
   },
   "mcp": {
