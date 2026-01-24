@@ -8,17 +8,18 @@
   "provider": {
     "opencode": {
       "options": {
-        "baseURL": "https://ai.surgent.dev/zen/v1"
+        "baseURL": "{env:OPENCODE_BASE_URL}",
+        "apiKey": "{env:OPENCODE_API_KEY}"
       }
     }
   },
   "mcp": {
     "convex": {
       "type": "remote",
-      "url": "http://localhost:4000/api/mcp/convex",
+      "url": "{env:SURGENT_BASE_URL}/api/mcp/convex",
       "oauth": false,
       "headers": {
-        "x-api-key": "{env:SURGENT_API_KEY}"
+        "x-api-key": "{env:OPENCODE_API_KEY}"
       }
     }
   },
