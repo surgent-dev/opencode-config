@@ -1,7 +1,7 @@
 ---
 description: Documentation writer - README, comments, API docs, technical writing
 mode: subagent
-model: opencode/glm-4.7-free
+model: opencode/gemini-3-flash
 temperature: 0.3
 maxSteps: 15
 tools:

@@ -1,8 +1,10 @@
 ---
 description: Plans and delegates all work to specialized subagents. Never executes code directly.
 mode: primary
-model: anthropic/claude-opus-4-5
-temperature: 0.3
+model: opencode/gpt-5.2-codex
+temperature: 0.7
+options:
+  reasoningEffort: xhigh
 tools:
   read: true
   glob: true

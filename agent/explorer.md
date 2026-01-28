@@ -1,8 +1,10 @@
 ---
 description: Fast codebase exploration - find files, search patterns, understand structure
 mode: subagent
-model: opencode/glm-4.7-free
-temperature: 0.1
+model: opencode/gpt-5.2-codex
+options:
+  reasoningEffort: medium
+temperature: 0.7
 maxSteps: 15
 tools:
   read: true

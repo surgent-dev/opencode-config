@@ -1,10 +1,10 @@
 ---
 description: Backend coding specialist - algorithms, APIs, refactoring, TypeScript/Convex
 mode: subagent
-model: opencode/gpt-5.2
+model: opencode/gpt-5.2-codex
 options:
-  reasoningEffort: medium
-temperature: 0.1
+  reasoningEffort: xhigh
+temperature: 0.7
 maxSteps: 25
 tools:
   read: true
