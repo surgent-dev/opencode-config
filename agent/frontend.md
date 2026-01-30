@@ -2,7 +2,7 @@
 description: Frontend specialist - React, Vue, CSS, UI components, styling, animations
 mode: subagent
 model: opencode/gemini-3-pro
-temperature: 0.7
+temperature: 1
 maxSteps: 30
 tools:
   read: true
