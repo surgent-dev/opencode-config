@@ -21,6 +21,14 @@
       "headers": {
         "x-api-key": "{env:OPENCODE_API_KEY}"
       }
+    },
+    "pay": {
+      "type": "remote",
+      "url": "{env:SURGENT_BASE_URL}/api/mcp/pay",
+      "oauth": false,
+      "headers": {
+        "x-api-key": "{env:OPENCODE_API_KEY}"
+      }
     }
   },
   "tools": {
