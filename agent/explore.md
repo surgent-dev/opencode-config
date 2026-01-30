@@ -1,8 +1,8 @@
 ---
 description: Fast codebase exploration
 mode: subagent
-model: opencode/gemini-3-flash
-temperature: 0.3
+model: opencode/gpt-5.2
+temperature: 0.2
 top_p: 1
 steps: 30
 ---
