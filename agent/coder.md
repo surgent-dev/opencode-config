@@ -3,9 +3,9 @@ description: Backend coding specialist - algorithms, APIs, refactoring, TypeScri
 mode: subagent
 model: opencode/gpt-5.2-codex
 options:
-  reasoningEffort: xhigh
+  reasoningEffort: high
 temperature: 0.7
-maxSteps: 25
+maxSteps: 50
 tools:
   read: true
   glob: true
