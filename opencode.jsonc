@@ -10,6 +10,29 @@
       "options": {
         "baseURL": "{env:OPENCODE_BASE_URL}",
         "apiKey": "{env:OPENCODE_API_KEY}"
+      },
+      "models": {
+        "gpt-5.2-codex": {
+          "name": "GPT 5.2 Codex"
+        },
+        "gpt-5.2": {
+          "name": "GPT 5.2"
+        },
+        "gpt-5-nano": {
+          "name": "GPT 5 Nano"
+        },
+        "claude-opus-4-5": {
+          "name": "Claude Opus 4.5"
+        },
+        "claude-haiku-4-5": {
+          "name": "Claude Haiku 4.5"
+        },
+        "gemini-3-flash": {
+          "name": "Gemini 3 Flash"
+        },
+        "gemini-3-pro": {
+          "name": "Gemini 3 Pro"
+        }
       }
     }
   },
