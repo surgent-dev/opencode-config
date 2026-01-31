@@ -1,13 +1,22 @@
 import { tool } from '@opencode-ai/plugin'
 import { $ } from 'bun'
 
-async function getSurgentConfig() {
+interface SurgentConfig {
+  name: string
+  scripts: {
+    dev: string | string[]
+    lint?: string
+    'dev:convex'?: string
+  }
+}
+
+async function getSurgentConfig(): Promise<SurgentConfig> {
   const cfg = await Bun.file('surgent.json')
     .json()
     .catch(() => null)
   if (!cfg?.name) throw new Error('Missing "name" in surgent.json')
   if (!cfg?.scripts?.dev) throw new Error('Missing "scripts.dev" in surgent.json')
-  return cfg as { name: string; scripts: { dev: string | string[] } }
+  return cfg as SurgentConfig
 }
 
 async function isPm2Online(name: string) {
@@ -17,25 +26,25 @@ async function isPm2Online(name: string) {
 
 export default tool({
   description:
-    'Ensures the development server is running. Syncs convex if needed and runs lint. Args: syncConvex (default false) to specify if convex should be synced.',
+    'Ensures the development server is running. Syncs Convex if needed and runs lint. Args: syncConvex (default false) - set to true after Convex schema/function changes.',
   args: { syncConvex: tool.schema.boolean().default(false) },
   async execute({ syncConvex }): Promise<string> {
     const cfg = await getSurgentConfig()
     const steps: string[] = []
 
-    if (syncConvex) {
-      await $`bun run convex:codegen`
-      steps.push('Ran convex:codegen')
+    // Sync Convex if requested and script exists
+    if (syncConvex && cfg.scripts['dev:convex']) {
+      await $`${{ raw: cfg.scripts['dev:convex'] }}`
+      steps.push('Synced Convex')
     }
 
-    await $`bun run lint`
-    steps.push('Ran lint')
-
-    if (syncConvex) {
-      await $`bun run convex:once`
-      steps.push('Ran convex:once')
+    // Run lint if script exists
+    if (cfg.scripts.lint) {
+      await $`${{ raw: cfg.scripts.lint }}`
+      steps.push('Ran lint')
     }
 
+    // Start dev server(s) via PM2
     const commands = Array.isArray(cfg.scripts.dev) ? cfg.scripts.dev : [cfg.scripts.dev]
     for (let i = 0; i < commands.length; i++) {
       const name = commands.length > 1 ? `${cfg.name}:${i + 1}` : cfg.name
