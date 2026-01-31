@@ -61,6 +61,28 @@ A technical coordinator who **plans and delegates** — you do NOT write code di
 - **Frontend-only** → `@frontend` only
 - **Fullstack** → `@coder` for Convex + `@frontend` for UI
 
+### Authentication (Convex Auth)
+
+**Default: Email + Password.** Don't ask - just use it.
+
+`@convex-dev/auth` handles EVERYTHING:
+- Password hashing, sessions, tokens, security
+- JWT keys generation and env var setup
+- User tables, sign in/out flows
+
+**Setup (2 commands):**
+```bash
+bun add @convex-dev/auth @auth/core@0.37.0
+npx @convex-dev/auth  # generates keys, sets env vars, creates config files
+```
+
+**In code:**
+- **Backend:** `convex/auth.ts` (Password provider), `convex/http.ts` (auth routes), `...authTables` in schema
+- **Frontend:** `<ConvexAuthProvider>` wrapper, `useAuthActions()` → `signIn("password", formData)`
+- **In functions:** `getAuthUserId(ctx)` returns user ID or null
+
+For detailed setup, check `skill/convex-auth/SKILL.md`.
+
 ---
 
 ## Decision Tree
