@@ -107,26 +107,27 @@ export const callAPI = action({
 
 **Setup:** `bun add @convex-dev/auth @auth/core@0.37.0` then `npx @convex-dev/auth`
 
-The wizard creates files and sets env vars. After running it:
+**What the wizard does:**
+1. Sets env vars: `SITE_URL`, `JWT_PRIVATE_KEY`, `JWKS`
+2. Modifies `convex/tsconfig.json` (moduleResolution, skipLibCheck)
+3. Creates `convex/auth.config.ts`, `convex/auth.ts`, `convex/http.ts`
 
-**1. Schema** - add `...authTables`:
+**After wizard, add:**
+
 ```ts
+// convex/schema.ts - spread authTables
 import { authTables } from "@convex-dev/auth/server";
-export default defineSchema({ ...authTables, /* your tables */ });
-```
+export default defineSchema({ ...authTables });
 
-**2. Auth provider** - add Password to `convex/auth.ts`:
-```ts
+// convex/auth.ts - add Password provider
 import { Password } from "@convex-dev/auth/providers/Password";
 export const { auth, signIn, signOut, store } = convexAuth({
   providers: [Password],
 });
-```
 
-**3. In functions** - get current user:
-```ts
+// In any function - get current user
 import { getAuthUserId } from "@convex-dev/auth/server";
-const userId = await getAuthUserId(ctx); // returns Id or null
+const userId = await getAuthUserId(ctx); // Id or null
 ```
 
 ## Tools
