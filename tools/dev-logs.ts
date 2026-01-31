@@ -8,10 +8,10 @@ export default tool({
     const cfg = await Bun.file('surgent.json').json().catch(() => null)
     if (!cfg?.name) return 'Missing "name" in surgent.json'
 
-    try {
-      return await $`pm2 logs ${cfg.name} --lines ${lines} --nostream`.text()
-    } catch (err: any) {
-      return `Failed to get logs: ${err.stderr?.toString() || err.message}`
+    const result = await $`pm2 logs ${cfg.name} --lines ${lines} --nostream`.nothrow().quiet()
+    if (result.exitCode !== 0) {
+      return `Failed to get logs:\n${result.stderr.toString()}`
     }
+    return result.stdout.toString()
   },
 })

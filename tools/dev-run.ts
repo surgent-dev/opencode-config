@@ -18,8 +18,10 @@ async function getSurgentConfig(): Promise<SurgentConfig> {
 }
 
 async function isPm2Online(name: string): Promise<boolean> {
+  const { exitCode, stdout } = await $`pm2 jlist`.nothrow().quiet()
+  if (exitCode !== 0) return false
   try {
-    const list = await $`pm2 jlist`.json()
+    const list = JSON.parse(stdout.toString())
     return list.some((p: any) => p?.name === name && p?.pm2_env?.status === 'online')
   } catch {
     return false
@@ -32,27 +34,30 @@ export default tool({
   args: { syncConvex: tool.schema.boolean().default(false) },
   async execute({ syncConvex }): Promise<string> {
     const cfg = await getSurgentConfig()
-    const steps: string[] = []
+    const output: string[] = []
 
     // Sync Convex if requested
     if (syncConvex && cfg.scripts['dev:convex']) {
-      try {
-        await $`${{ raw: cfg.scripts['dev:convex'] }}`.quiet()
-        steps.push('✓ Synced Convex')
-      } catch (err: any) {
-        return `Convex sync failed:\n${err.stderr?.toString() || err.message}`
+      const result = await $`${{ raw: cfg.scripts['dev:convex'] }}`.nothrow().quiet()
+      if (result.exitCode !== 0) {
+        output.push('CONVEX SYNC FAILED:')
+        output.push(result.stdout.toString())
+        output.push(result.stderr.toString())
+        return output.join('\n')
       }
+      output.push('✓ Convex synced')
     }
 
     // Run lint
     if (cfg.scripts.lint) {
-      try {
-        await $`${{ raw: cfg.scripts.lint }}`.quiet()
-        steps.push('✓ Lint passed')
-      } catch (err: any) {
-        const output = err.stderr?.toString() || err.stdout?.toString() || err.message
-        return `Lint failed:\n${output}`
+      const result = await $`${{ raw: cfg.scripts.lint }}`.nothrow().quiet()
+      if (result.exitCode !== 0) {
+        output.push('LINT FAILED:')
+        output.push(result.stdout.toString())
+        output.push(result.stderr.toString())
+        return output.join('\n')
       }
+      output.push('✓ Lint passed')
     }
 
     // Start dev server(s) via PM2
@@ -60,17 +65,18 @@ export default tool({
     for (let i = 0; i < commands.length; i++) {
       const name = commands.length > 1 ? `${cfg.name}:${i + 1}` : cfg.name
       if (await isPm2Online(name)) {
-        steps.push(`✓ ${name} already online`)
+        output.push(`✓ ${name} already online`)
       } else {
-        try {
-          await $`pm2 start ${commands[i]} --name ${name}`.quiet()
-          steps.push(`✓ Started ${name}`)
-        } catch (err: any) {
-          steps.push(`✗ Failed to start ${name}: ${err.message}`)
+        const result = await $`pm2 start ${commands[i]} --name ${name}`.nothrow().quiet()
+        if (result.exitCode !== 0) {
+          output.push(`✗ Failed to start ${name}:`)
+          output.push(result.stderr.toString())
+        } else {
+          output.push(`✓ Started ${name}`)
         }
       }
     }
 
-    return steps.join('\n')
+    return output.join('\n')
   },
 })

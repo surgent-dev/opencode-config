@@ -14,11 +14,10 @@ export default tool({
     if (!targetPath?.trim()) return 'Missing targetPath'
     if (path.isAbsolute(targetPath)) return 'targetPath must be relative'
 
-    try {
-      await $`curl -L --create-dirs -o ${path.join(process.cwd(), targetPath)} ${sourceUrl}`.quiet()
-      return `✓ Downloaded to ${targetPath}`
-    } catch (err: any) {
-      return `Failed to download: ${err.stderr?.toString() || err.message}`
+    const result = await $`curl -L --create-dirs -o ${path.join(process.cwd(), targetPath)} ${sourceUrl}`.nothrow().quiet()
+    if (result.exitCode !== 0) {
+      return `Download failed:\n${result.stderr.toString()}`
     }
+    return `✓ Downloaded to ${targetPath}`
   },
 })
