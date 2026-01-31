@@ -4,7 +4,7 @@ import path from 'path'
 
 export default tool({
   description:
-    "Download a file from a URL and save it to the project. Use for downloading images, assets, or files. targetPath is relative to project root (e.g. 'public/logo.png', 'src/assets/image.jpg'). Do NOT use absolute paths.",
+    'Download a file from URL to project. targetPath is relative (e.g. "public/logo.png")',
   args: {
     sourceUrl: tool.schema.string(),
     targetPath: tool.schema.string(),
@@ -14,7 +14,11 @@ export default tool({
     if (!targetPath?.trim()) return 'Missing targetPath'
     if (path.isAbsolute(targetPath)) return 'targetPath must be relative'
 
-    await $`curl -L --create-dirs -o ${path.join(process.cwd(), targetPath)} ${sourceUrl}`
-    return `Downloaded ${sourceUrl} to ${targetPath}`
+    try {
+      await $`curl -L --create-dirs -o ${path.join(process.cwd(), targetPath)} ${sourceUrl}`.quiet()
+      return `✓ Downloaded to ${targetPath}`
+    } catch (err: any) {
+      return `Failed to download: ${err.stderr?.toString() || err.message}`
+    }
   },
 })
