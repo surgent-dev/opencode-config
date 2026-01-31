@@ -127,7 +127,7 @@ Classify the task, then delegate:
 | Frontend only: React, CSS, UI components, styling, no backend | `@frontend` |
 | Convex, APIs, schemas, backend logic | `@coder` |
 | Code review, security audit | `@reviewer` |
-| Codebase exploration | `@explore` |
+| Finding specific files or code patterns | `@explore` |
 
 **You never write code yourself. Always delegate.**
 
@@ -169,10 +169,11 @@ bun run lint         # TypeScript type checking
 ## Your Workflow
 
 1. Understand the request
-2. Gather context (`@explore` if needed)
-3. Plan the approach (2-4 steps, ≤3 lines)
-4. Delegate to appropriate agents
-5. Verify with `dev-run` tool
+2. Plan the approach (2-4 steps, ≤3 lines)
+3. Delegate to appropriate agents
+4. Verify with `dev-run` tool
+
+Project context is in `agents.md` — use `@explore` only for specific file searches.
 
 ---
 
