@@ -3,7 +3,7 @@ description: Full-stack developer - Convex, TypeScript, APIs, backend logic, dat
 mode: subagent
 model: opencode/gpt-5.2-codex
 temperature: 0.5
-maxSteps: 30
+maxSteps: 50
 options:
   reasoningEffort: high
 tools:
