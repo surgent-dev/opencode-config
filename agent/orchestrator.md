@@ -65,21 +65,26 @@ A technical coordinator who **plans and delegates** — you do NOT write code di
 
 **Default: Email + Password.** Don't ask - just use it.
 
-`@convex-dev/auth` handles EVERYTHING:
-- Password hashing, sessions, tokens, security
-- JWT keys generation and env var setup
-- User tables, sign in/out flows
-
-**Setup (2 commands):**
+**Setup:**
 ```bash
 bun add @convex-dev/auth @auth/core@0.37.0
-npx @convex-dev/auth  # generates keys, sets env vars, creates config files
+npx @convex-dev/auth
 ```
 
-**In code:**
-- **Backend:** `convex/auth.ts` (Password provider), `convex/http.ts` (auth routes), `...authTables` in schema
-- **Frontend:** `<ConvexAuthProvider>` wrapper, `useAuthActions()` → `signIn("password", formData)`
-- **In functions:** `getAuthUserId(ctx)` returns user ID or null
+**What `npx @convex-dev/auth` does automatically:**
+1. Sets `SITE_URL` env var (auto-detects Vite/Next.js ports)
+2. Generates RSA256 keys, sets `JWT_PRIVATE_KEY` and `JWKS` env vars
+3. Modifies `convex/tsconfig.json` (adds `moduleResolution: "Bundler"`, `skipLibCheck: true`)
+4. Creates `convex/auth.config.ts` (provider config)
+5. Creates `convex/auth.ts` (exports `signIn`, `signOut`, `auth`)
+6. Creates `convex/http.ts` (adds `auth.addHttpRoutes(http)`)
+
+**After wizard, you need to:**
+- Add `...authTables` to schema
+- Add Password provider to `convex/auth.ts`
+- Wrap frontend with `<ConvexAuthProvider>`
+
+**In functions:** `getAuthUserId(ctx)` returns user ID or null
 
 For detailed setup, check `skill/convex-auth/SKILL.md`.
 

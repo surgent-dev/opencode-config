@@ -103,6 +103,32 @@ export const callAPI = action({
 - Queries/mutations ≤ 1s, actions ≤ 10m
 - Arrays ≤ 8192 items
 
+## Authentication (Convex Auth)
+
+**Setup:** `bun add @convex-dev/auth @auth/core@0.37.0` then `npx @convex-dev/auth`
+
+The wizard creates files and sets env vars. After running it:
+
+**1. Schema** - add `...authTables`:
+```ts
+import { authTables } from "@convex-dev/auth/server";
+export default defineSchema({ ...authTables, /* your tables */ });
+```
+
+**2. Auth provider** - add Password to `convex/auth.ts`:
+```ts
+import { Password } from "@convex-dev/auth/providers/Password";
+export const { auth, signIn, signOut, store } = convexAuth({
+  providers: [Password],
+});
+```
+
+**3. In functions** - get current user:
+```ts
+import { getAuthUserId } from "@convex-dev/auth/server";
+const userId = await getAuthUserId(ctx); // returns Id or null
+```
+
 ## Tools
 
 | Tool | When to Use |
