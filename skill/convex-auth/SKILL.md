@@ -7,6 +7,7 @@ description: Setup email/password auth using Convex. Run after Convex project is
 
 - Convex project must be created first (`convex_create_project`)
 - Auth keys (SITE_URL, JWT_PRIVATE_KEY, JWKS) are auto-configured at project creation
+- For Convex patterns (queries, mutations, schema), see `skill/convex/SKILL.md`
 
 ## Setup Steps
 
@@ -16,15 +17,40 @@ bun add @convex-dev/auth @auth/core@0.37.0
 ```
 
 ### 2. Update convex/tsconfig.json
-Ensure these compiler options are set:
+Use this full config (required for @convex-dev/auth):
 ```json
 {
+  /* This TypeScript project config describes the environment that
+   * Convex functions run in and is used to typecheck them.
+   * You can modify it, but some settings required to use Convex.
+   */
   "compilerOptions": {
+    /* These settings are not required by Convex and can be modified. */
+    "allowJs": true,
+    "strict": true,
+    "jsx": "react-jsx",
+    "allowSyntheticDefaultImports": true,
+
+    /* Required for @convex-dev/auth */
     "moduleResolution": "Bundler",
-    "skipLibCheck": true
-  }
+    "skipLibCheck": true,
+
+    /* These compiler options are required by Convex */
+    "target": "ESNext",
+    "lib": ["ES2021", "dom"],
+    "forceConsistentCasingInFileNames": true,
+    "module": "ESNext",
+    "isolatedModules": true,
+    "noEmit": true
+  },
+  "include": ["./**/*"],
+  "exclude": ["./_generated"]
 }
 ```
+
+**Auth-specific requirements:**
+- `moduleResolution: "Bundler"` - Required for @convex-dev/auth imports
+- `skipLibCheck: true` - Avoids type conflicts with auth libraries
 
 ### 3. Create convex/auth.config.ts
 ```ts
@@ -83,23 +109,48 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
 ```
 
 ## Auth Form Example
+
+**Important:** Use a plain object (not FormData) to avoid `InvalidAccountId` errors.
+
 ```tsx
 import { useAuthActions } from "@convex-dev/auth/react";
 import { useState } from "react";
+import { toast } from "sonner"; // or your toast library
 
 export function AuthForm() {
   const { signIn } = useAuthActions();
   const [flow, setFlow] = useState<"signIn" | "signUp">("signIn");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await signIn("password", {
+        email,
+        password,
+        flow,
+        ...(flow === "signUp" ? { name } : {}),
+      });
+    } catch (error) {
+      // InvalidAccountId = account not found or invalid credentials
+      const message = String(error);
+      if (message.includes("InvalidAccountId")) {
+        toast.error("Invalid email or password");
+      } else {
+        toast.error("Authentication failed");
+      }
+    }
+  };
 
   return (
-    <form onSubmit={(e) => {
-      e.preventDefault();
-      const formData = new FormData(e.currentTarget);
-      signIn("password", formData);
-    }}>
-      <input name="email" type="email" placeholder="Email" required />
-      <input name="password" type="password" placeholder="Password" required />
-      <input name="flow" type="hidden" value={flow} />
+    <form onSubmit={handleSubmit}>
+      {flow === "signUp" && (
+        <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Name" required />
+      )}
+      <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" required />
+      <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" required />
       <button type="submit">{flow === "signIn" ? "Sign In" : "Sign Up"}</button>
       <button type="button" onClick={() => setFlow(flow === "signIn" ? "signUp" : "signIn")}>
         {flow === "signIn" ? "Need an account?" : "Have an account?"}
@@ -109,6 +160,9 @@ export function AuthForm() {
 }
 ```
 
+**Common errors:**
+- `InvalidAccountId` - User tried to sign in but account doesn't exist, or wrong credentials. Show "Invalid email or password".
+
 ## In Convex Functions
 ```ts
 import { getAuthUserId } from "@convex-dev/auth/server";
@@ -117,12 +171,33 @@ const userId = await getAuthUserId(ctx);
 if (!userId) throw new Error("Not authenticated");
 ```
 
+## Convex Folder Structure (with Auth)
+
+```
+convex/
+├── _generated/          # Auto-generated (don't edit)
+│   ├── api.ts
+│   ├── dataModel.ts
+│   └── server.ts
+├── tsconfig.json        # Convex-specific TS config
+├── schema.ts            # Database schema with ...authTables
+├── auth.config.ts       # Auth provider config
+├── auth.ts              # Auth setup (signIn, signOut, etc.)
+├── http.ts              # HTTP routes (auth routes added here)
+└── [your-files].ts      # Your queries, mutations, actions
+```
+
+**File naming:**
+- Use kebab-case for files: `user-profiles.ts`, `chat-messages.ts`
+- Group related functions in single files
+- Use `internal` prefix for private functions
+
 ## Checklist
 - [ ] `bun add @convex-dev/auth @auth/core@0.37.0`
-- [ ] `convex/tsconfig.json` updated (moduleResolution, skipLibCheck)
+- [ ] `convex/tsconfig.json` updated (full config with moduleResolution, skipLibCheck)
 - [ ] `convex/auth.config.ts` created
 - [ ] `convex/auth.ts` created with Password provider
-- [ ] `convex/http.ts` created
-- [ ] `...authTables` spread in schema
+- [ ] `convex/http.ts` created with auth routes
+- [ ] `convex/schema.ts` has `...authTables` spread
 - [ ] Frontend wrapped with `ConvexAuthProvider`
 - [ ] Run `dev-run` with `syncConvex: true` to push changes

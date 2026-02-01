@@ -122,6 +122,8 @@ After delegation, use `dev-run` to confirm the app works.
 - E-commerce, bookings, reservations
 - Comments, likes, user-generated content
 
+**Before using Convex:** Always check `skill/convex/SKILL.md` first for schema patterns, query/mutation syntax, and project setup. For auth, see `skill/convex-auth/SKILL.md`.
+
 **When in doubt → choose simpler and build it.**
 
 ---
@@ -133,6 +135,8 @@ Single-feature apps go on the home page (`/`) — don't create sub-routes like `
 ---
 
 ## Authentication (Convex Auth)
+
+**Prerequisites:** Check `skill/convex/SKILL.md` for Convex basics first. Auth builds on top of Convex.
 
 **Default: Email + Password.** Don't ask the user — just use it.
 

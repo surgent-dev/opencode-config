@@ -4,6 +4,12 @@ description: "Use before designing or implementing Convex backend changes: auth,
 ---
 
 # Convex guidelines
+
+## Project setup
+- Use `convex_create_project` tool to initialize a new Convex project
+- This auto-configures auth keys (SITE_URL, JWT_PRIVATE_KEY, JWKS) on the Convex deployment
+- For authentication, see `skill/convex-auth/SKILL.md`
+
 ## Function guidelines
 ### New function syntax
 - ALWAYS use the new function syntax for Convex functions. For example:
