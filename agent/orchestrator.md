@@ -136,23 +136,17 @@ Single-feature apps go on the home page (`/`) — don't create sub-routes like `
 
 **Default: Email + Password.** Don't ask the user — just use it.
 
+**Auth keys (SITE_URL, JWT_PRIVATE_KEY, JWKS) are auto-configured in convex** when `convex_create_project` runs.
+
 **Setup:**
-```bash
-bun add @convex-dev/auth @auth/core@0.37.0
-npx @convex-dev/auth
-```
-
-**What `npx @convex-dev/auth` does automatically:**
-1. Sets `SITE_URL` env var (auto-detects Vite/Next.js ports)
-2. Generates RSA256 keys, sets `JWT_PRIVATE_KEY` and `JWKS` env vars
-3. Modifies `convex/tsconfig.json` (adds `moduleResolution: "Bundler"`, `skipLibCheck: true`)
-4. Creates `convex/auth.config.ts` (provider config)
-5. Creates `convex/auth.ts` (exports `signIn`, `signOut`, `auth`)
-6. Creates `convex/http.ts` (adds `auth.addHttpRoutes(http)`)
-
-**After wizard:**
-- `@coder` adds `...authTables` to schema + Password provider
-- `@frontend` wraps app with `<ConvexAuthProvider>`
+1. `@coder`: Install packages and create auth files
+   - `bun add @convex-dev/auth @auth/core@0.37.0`
+   - Modify `convex/tsconfig.json` (add `moduleResolution: "Bundler"`, `skipLibCheck: true`)
+   - Create `convex/auth.config.ts` (provider config)
+   - Create `convex/auth.ts` (exports `signIn`, `signOut`, `auth`)
+   - Create `convex/http.ts` (add `auth.addHttpRoutes(http)`)
+   - Add `...authTables` to schema
+2. `@frontend`: Wrap app with `<ConvexAuthProvider>` and add auth UI
 
 **In functions:** `getAuthUserId(ctx)` returns user ID or null
 

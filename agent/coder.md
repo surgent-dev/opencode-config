@@ -105,30 +105,38 @@ export const callAPI = action({
 
 ## Authentication (Convex Auth)
 
-**Setup:** `bun add @convex-dev/auth @auth/core@0.37.0` then `npx @convex-dev/auth`
+**Auth keys are auto-generated** when `convex_create_project` runs. No wizard needed.
 
-**What the wizard does:**
-1. Sets env vars: `SITE_URL`, `JWT_PRIVATE_KEY`, `JWKS`
-2. Modifies `convex/tsconfig.json` (moduleResolution, skipLibCheck)
-3. Creates `convex/auth.config.ts`, `convex/auth.ts`, `convex/http.ts`
-
-**After wizard, add:**
+**Setup:** `bun add @convex-dev/auth @auth/core@0.37.0` then create these files:
 
 ```ts
+// convex/auth.config.ts
+export default { providers: [] };
+
+// convex/auth.ts
+import { convexAuth } from "@convex-dev/auth/server";
+import { Password } from "@convex-dev/auth/providers/Password";
+export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
+  providers: [Password],
+});
+
+// convex/http.ts
+import { httpRouter } from "convex/server";
+import { auth } from "./auth";
+const http = httpRouter();
+auth.addHttpRoutes(http);
+export default http;
+
 // convex/schema.ts - spread authTables
 import { authTables } from "@convex-dev/auth/server";
 export default defineSchema({ ...authTables });
-
-// convex/auth.ts - add Password provider
-import { Password } from "@convex-dev/auth/providers/Password";
-export const { auth, signIn, signOut, store } = convexAuth({
-  providers: [Password],
-});
 
 // In any function - get current user
 import { getAuthUserId } from "@convex-dev/auth/server";
 const userId = await getAuthUserId(ctx); // Id or null
 ```
+
+Also update `convex/tsconfig.json`: `"moduleResolution": "Bundler"`, `"skipLibCheck": true`
 
 ## Tools
 

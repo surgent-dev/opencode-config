@@ -1,27 +1,65 @@
 ---
 name: convex-auth
-description: Setup email/password auth using Convex. Run after Convex is initialized.
+description: Setup email/password auth using Convex. Run after Convex project is created.
 ---
 
-## Setup
+## Prerequisites
 
+- Convex project must be created first (`convex_create_project`)
+- Auth keys (SITE_URL, JWT_PRIVATE_KEY, JWKS) are auto-configured at project creation
+
+## Setup Steps
+
+### 1. Install packages
 ```bash
 bun add @convex-dev/auth @auth/core@0.37.0
-npx @convex-dev/auth
 ```
 
-The wizard automatically:
-- Sets env vars (`SITE_URL`, `JWT_PRIVATE_KEY`, `JWKS`)
-- Updates `convex/tsconfig.json`
-- Creates `convex/auth.config.ts`, `convex/auth.ts`, `convex/http.ts`
+### 2. Update convex/tsconfig.json
+Ensure these compiler options are set:
+```json
+{
+  "compilerOptions": {
+    "moduleResolution": "Bundler",
+    "skipLibCheck": true
+  }
+}
+```
 
-## After Wizard
-
-### 1. Schema - add authTables
+### 3. Create convex/auth.config.ts
 ```ts
-// convex/schema.ts
-import { defineSchema } from "convex/server";
+export default {
+  providers: [],
+};
+```
+
+### 4. Create convex/auth.ts
+```ts
+import { convexAuth } from "@convex-dev/auth/server";
+import { Password } from "@convex-dev/auth/providers/Password";
+
+export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
+  providers: [Password],
+});
+```
+
+### 5. Create convex/http.ts
+```ts
+import { httpRouter } from "convex/server";
+import { auth } from "./auth";
+
+const http = httpRouter();
+
+auth.addHttpRoutes(http);
+
+export default http;
+```
+
+### 6. Update convex/schema.ts - add authTables
+```ts
+import { defineSchema, defineTable } from "convex/server";
 import { authTables } from "@convex-dev/auth/server";
+import { v } from "convex/values";
 
 export default defineSchema({
   ...authTables,
@@ -29,20 +67,9 @@ export default defineSchema({
 });
 ```
 
-### 2. Auth - add Password provider
-```ts
-// convex/auth.ts
-import { convexAuth } from "@convex-dev/auth/server";
-import { Password } from "@convex-dev/auth/providers/Password";
-
-export const { auth, signIn, signOut, store } = convexAuth({
-  providers: [Password],
-});
-```
-
-### 3. Frontend - wrap with provider
+### 7. Frontend - wrap with provider
 ```tsx
-// src/main.tsx
+// src/main.tsx or app entry
 import { ConvexAuthProvider } from "@convex-dev/auth/react";
 import { ConvexReactClient } from "convex/react";
 
@@ -55,7 +82,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
 );
 ```
 
-### 4. Auth Form
+## Auth Form Example
 ```tsx
 import { useAuthActions } from "@convex-dev/auth/react";
 import { useState } from "react";
@@ -83,7 +110,6 @@ export function AuthForm() {
 ```
 
 ## In Convex Functions
-
 ```ts
 import { getAuthUserId } from "@convex-dev/auth/server";
 
@@ -92,8 +118,11 @@ if (!userId) throw new Error("Not authenticated");
 ```
 
 ## Checklist
-- [ ] `@auth/core` pinned to `0.37.0`
-- [ ] `npx @convex-dev/auth` ran
-- [ ] `...authTables` in schema
-- [ ] Password provider added
+- [ ] `bun add @convex-dev/auth @auth/core@0.37.0`
+- [ ] `convex/tsconfig.json` updated (moduleResolution, skipLibCheck)
+- [ ] `convex/auth.config.ts` created
+- [ ] `convex/auth.ts` created with Password provider
+- [ ] `convex/http.ts` created
+- [ ] `...authTables` spread in schema
 - [ ] Frontend wrapped with `ConvexAuthProvider`
+- [ ] Run `dev-run` with `syncConvex: true` to push changes
