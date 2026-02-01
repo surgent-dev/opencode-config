@@ -76,7 +76,12 @@ Be specific and actionable:
 - **Requirements**: Key details (2-4 bullets)
 - **Constraints**: What to avoid
 
-Example: "Build a Kanban board on home page (src/pages/home.tsx). 3 columns, add/delete tasks. Use existing Card component. No new routes."
+### Expected Response
+
+- **Files changed**: What was created/modified
+- **Decisions**: Choices made during implementation
+- **Checks**: What was verified
+- **Result**: What works now
 
 ### Execution Order
 
