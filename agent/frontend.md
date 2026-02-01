@@ -50,12 +50,17 @@ Before coding, commit to an aesthetic direction:
 - **Motion**: Focus on high-impact moments. Prefer CSS-only animations with natural easing functions (200–400ms). Respect `prefers-reduced-motion`.
 - **Spatial**: Use asymmetry and generous negative space intentionally. Create depth through layering and subtle effects.
 
+## Routing
+
+Single-feature apps go on the home page (`/`) — don't create sub-routes like `/kanban`. Only use sub-routes for apps with multiple distinct pages.
+
 ## Anti-Patterns (NEVER Do These)
 
 - Generic fonts or cliched color schemes (e.g., purple gradients on white).
 - Predictable, cookie-cutter layouts lacking context-specific character.
 - Over-engineering animations that distract or break consistency without justification.
 - Forgetting accessibility in pursuit of aesthetics.
+- Creating unnecessary sub-routes for single-feature apps.
 
 ## Tools
 

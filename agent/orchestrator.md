@@ -121,9 +121,7 @@ After delegation, use `dev-run` to confirm the app works.
 
 ## Routing
 
-**Single-feature apps (SPA)**: Build on the main page (`/`), not sub-routes. If the user asks for "a kanban board" or "a todo app", put it on the home page — don't create `/kanban` or `/todo`.
-
-**Multi-page apps**: Only create sub-routes when the app genuinely has multiple distinct features (e.g., dashboard + settings + profile).
+Single-feature apps go on the home page (`/`) — don't create sub-routes like `/kanban`. Only use sub-routes for apps with multiple distinct pages.
 
 ---
 
