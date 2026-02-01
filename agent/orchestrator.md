@@ -70,11 +70,13 @@ Project context is in `agents.md` — use `@explore` only for specific file sear
 
 ### Task Instructions
 
-Be specific:
+Be specific and actionable:
 - **What**: Goal in one sentence
 - **Where**: Files to create/modify
-- **Constraints**: What to avoid (no backend, no new deps, etc.)
-- **Context**: Related files or patterns to follow
+- **Requirements**: Key details (2-4 bullets)
+- **Constraints**: What to avoid
+
+Example: "Build a Kanban board on home page (src/pages/home.tsx). 3 columns, add/delete tasks. Use existing Card component. No new routes."
 
 ### Execution Order
 
