@@ -165,6 +165,7 @@ For detailed patterns, see `skill/convex-auth/SKILL.md`.
 | `dev-run` | Start dev server and run lint |
 | `dev-run` with `syncConvex: true` | After Convex schema/function changes |
 | `dev-logs` | Debug runtime errors, check server output |
+| `convex-logs` | Debug Convex function errors (use `success: true` for all logs). Fallback: `timeout 3 bunx convex logs --history 50 --success` |
 | `download-to-repo` | Download images/assets to project |
 | `write-client-env` | Write client-side env vars to `.env` |
 | `convex_create_project` | Initialize new Convex project |
@@ -186,6 +187,14 @@ bun run lint         # TypeScript type checking
 ```
 
 ---
+
+## Error Handling
+
+When delegating tasks, ensure agents implement proper error feedback:
+- **@coder**: Throw clear, user-friendly error messages (not technical codes)
+- **@frontend**: Wrap async calls in try-catch, show errors via `toast.error()`
+
+Users should always see what went wrong — never silent failures.
 
 ## Rules
 

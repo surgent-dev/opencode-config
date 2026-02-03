@@ -87,6 +87,36 @@ export const callAPI = action({
 });
 ```
 
+## Error Handling
+
+**Throw clear, user-friendly error messages.** Frontend displays these in toasts.
+
+```ts
+// Good - clear message the user can understand
+if (!item) {
+  throw new Error("Item not found")
+}
+
+if (!userId) {
+  throw new Error("Please sign in to continue")
+}
+
+if (items.length >= 100) {
+  throw new Error("Maximum limit of 100 items reached")
+}
+
+// Bad - generic or technical messages
+throw new Error("404")
+throw new Error("Unauthorized")
+throw new ConvexError("ITEM_NOT_FOUND")
+```
+
+**Rules:**
+- Write error messages as if talking to a non-technical user
+- Be specific about what went wrong and what to do
+- Validate early and fail fast with clear messages
+- Don't expose internal details (IDs, stack traces)
+
 ## Rules
 
 - **Always** use validators for args
@@ -96,6 +126,7 @@ export const callAPI = action({
 - Use `Id<"table">` for document IDs
 - Actions: add `"use node";`, no `ctx.db` access
 - Store `Id<"_storage">` not URLs for files
+- **Always** throw user-friendly error messages (shown in UI toasts)
 
 ## Limits to Design Around
 
@@ -143,6 +174,7 @@ Also update `convex/tsconfig.json`: `"moduleResolution": "Bundler"`, `"skipLibCh
 | Tool | When to Use |
 |------|-------------|
 | `dev-run` with `syncConvex: true` | After schema/function changes |
+| `convex-logs` | Debug function errors (use `success: true` for all logs). Fallback: `timeout 3 bunx convex logs --history 50 --success` |
 | `convex_create_project` | Initialize new Convex project |
 | `convex_set_env_vars` | Set API keys and secrets |
 | `convex_list_env_vars` | Check existing env vars |

@@ -54,6 +54,39 @@ Before coding, commit to an aesthetic direction:
 
 Single-feature apps go on the home page (`/`) — don't create sub-routes like `/kanban`. Only use sub-routes for apps with multiple distinct pages.
 
+## Error Handling
+
+**Always surface errors to users via toast notifications.** Never silently fail.
+
+```tsx
+import { toast } from "sonner"
+
+// In try-catch blocks - show the actual error message
+try {
+  await doSomething()
+} catch (error) {
+  toast.error(error instanceof Error ? error.message : "Operation failed")
+}
+
+// With Convex mutations/actions
+const doAction = useMutation(api.actions.doSomething)
+
+const handleClick = async () => {
+  try {
+    await doAction({ ... })
+    toast.success("Done!")
+  } catch (error) {
+    toast.error(error instanceof Error ? error.message : "Something went wrong")
+  }
+}
+```
+
+**Rules:**
+- Show the **actual error message** from the backend, not generic text
+- Use `toast.error()` for failures, `toast.success()` for confirmations
+- Wrap all async operations (mutations, actions, fetches) in try-catch
+- Keep error messages concise but informative
+
 ## Anti-Patterns (NEVER Do These)
 
 - Generic fonts or cliched color schemes (e.g., purple gradients on white).
@@ -61,6 +94,7 @@ Single-feature apps go on the home page (`/`) — don't create sub-routes like `
 - Over-engineering animations that distract or break consistency without justification.
 - Forgetting accessibility in pursuit of aesthetics.
 - Creating unnecessary sub-routes for single-feature apps.
+- Silently swallowing errors without user feedback.
 
 ## Tools
 
