@@ -119,6 +119,7 @@ throw new ConvexError("ITEM_NOT_FOUND")
 
 ## Rules
 
+- **Always** run `dev-run` after each significant change (schema updates, new functions, API changes) — don't wait until the end
 - **Always** use validators for args
 - **Never** add return validators initially
 - **Never** add built-in indexes (`by_id`, `by_creation_time`)
@@ -169,11 +170,20 @@ const userId = await getAuthUserId(ctx); // Id or null
 
 Also update `convex/tsconfig.json`: `"moduleResolution": "Bundler"`, `"skipLibCheck": true`
 
+## Debugging Protocol
+
+**When something "doesn't work" after auth/config changes:**
+
+1. **Always check Convex push output first** — config errors only appear there, not in runtime logs
+2. **Run `convex-logs`** — look for `InvalidSecret`, `InvalidAuthConfig`, or silent failures
+3. **Don't assume frontend bug** — if auth UI is stuck, it's usually backend config (especially `auth.config.ts`)
+4. **Common auth trap:** Auth can "seem to succeed" client-side while server config is invalid — always verify Convex sync succeeded
+
 ## Tools
 
 | Tool | When to Use |
 |------|-------------|
-| `dev-run` with `syncConvex: true` | After schema/function changes |
+| `dev-run` with `syncConvex: true` | After schema/function changes — **check output for config errors** |
 | `convex-logs` | Debug function errors (use `success: true` for all logs). Fallback: `timeout 3 bunx convex logs --history 50 --success` |
 | `convex_create_project` | Initialize new Convex project |
 | `convex_set_env_vars` | Set API keys and secrets |
