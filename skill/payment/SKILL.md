@@ -53,6 +53,7 @@ export const {
 ```tsx
 import { useAction } from "convex/react"
 import { api } from "../convex/_generated/api"
+import { toast } from "sonner"
 
 export function CheckoutButton({ productSlug }: { productSlug: string }) {
   const createCheckout = useAction(api.pay.createCheckout)
@@ -63,8 +64,15 @@ export function CheckoutButton({ productSlug }: { productSlug: string }) {
       successUrl: window.location.origin + "/success",
       cancelUrl: window.location.origin + "/cancel",
     })
-    if (data?.checkoutUrl) window.location.href = data.checkoutUrl
-    if (error) console.error(error.message)
+    if (error) {
+      toast.error(error.message)
+      return
+    }
+    if (data?.checkoutUrl) {
+      window.location.href = data.checkoutUrl
+    } else {
+      toast.error("Failed to create checkout")
+    }
   }
 
   return <button onClick={handleCheckout}>Subscribe</button>
@@ -77,6 +85,7 @@ For checkout without requiring sign-in:
 ```tsx
 import { useAction } from "convex/react"
 import { api } from "../convex/_generated/api"
+import { toast } from "sonner"
 
 // Get or create persistent guest ID
 function getGuestId(): string {
@@ -96,13 +105,19 @@ export function GuestCheckoutButton({ productSlug }: { productSlug: string }) {
     const { data, error } = await guestCheckout({
       productSlug,
       customerId: getGuestId(),
-      customerEmail: "guest@example.com", // optional
       customerName: "Guest", // optional
       successUrl: window.location.origin + "/success",
       cancelUrl: window.location.origin + "/cancel",
     })
-    if (data?.checkoutUrl) window.location.href = data.checkoutUrl
-    if (error) console.error(error.message)
+    if (error) {
+      toast.error(error.message)
+      return
+    }
+    if (data?.checkoutUrl) {
+      window.location.href = data.checkoutUrl
+    } else {
+      toast.error("Failed to create checkout")
+    }
   }
 
   return <button onClick={handleCheckout}>Buy Now</button>
@@ -132,6 +147,26 @@ const products = await listProducts({})
 Products and prices can be queried from the pay MCP server using `list_products` tool, or via `listProducts` action in frontend.
 
 ## Important Notes
+
+### Response Shape (CRITICAL)
+All Surpay actions return `{ data, error }`. **NEVER** treat the response as a URL directly.
+
+```tsx
+// ✅ CORRECT
+const { data, error } = await guestCheckout({...})
+if (error) {
+  toast.error(error.message)
+  return
+}
+if (data?.checkoutUrl) {
+  window.location.href = data.checkoutUrl
+}
+
+// ❌ WRONG - will cause [object Object] redirect
+const result = await guestCheckout({...})
+window.location.href = result // BROKEN!
+window.location.href = result.url // BROKEN! (it's checkoutUrl, not url)
+```
 
 ### identify() Function
 The `identify()` function runs in a Convex **action** context:
