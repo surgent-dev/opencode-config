@@ -55,7 +55,12 @@ Use this full config (required for @convex-dev/auth):
 ### 3. Create convex/auth.config.ts
 ```ts
 export default {
-  providers: [],
+  providers: [
+    {
+      domain: process.env.CONVEX_SITE_URL,
+      applicationID: "convex",
+    },
+  ],
 };
 ```
 
@@ -134,10 +139,11 @@ export function AuthForm() {
         ...(flow === "signUp" ? { name } : {}),
       });
     } catch (error) {
-      // InvalidAccountId = account not found or invalid credentials
       const message = String(error);
-      if (message.includes("InvalidAccountId")) {
+      if (message.includes("InvalidAccountId") || message.includes("InvalidSecret")) {
         toast.error("Invalid email or password");
+      } else if (message.includes("TooManyFailedAttempts")) {
+        toast.error("Too many attempts, try again later");
       } else {
         toast.error("Authentication failed");
       }
@@ -160,8 +166,10 @@ export function AuthForm() {
 }
 ```
 
-**Common errors:**
-- `InvalidAccountId` - User tried to sign in but account doesn't exist, or wrong credentials. Show "Invalid email or password".
+**Common errors (map to friendly messages):**
+- `InvalidAccountId` — account doesn't exist → "Invalid email or password"
+- `InvalidSecret` — wrong password → "Invalid email or password"
+- `TooManyFailedAttempts` — rate limited → "Too many attempts, try again later"
 
 ## In Convex Functions
 ```ts
