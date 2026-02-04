@@ -69,7 +69,11 @@ export function CheckoutButton({ productSlug }: { productSlug: string }) {
       return
     }
     if (data?.checkoutUrl) {
-      window.location.href = data.checkoutUrl
+      const win = window.open(data.checkoutUrl, "_blank", "noopener,noreferrer")
+      if (!win) {
+        toast.info("Redirecting to checkout...")
+        window.location.href = data.checkoutUrl
+      }
     } else {
       toast.error("Failed to create checkout")
     }
@@ -114,7 +118,11 @@ export function GuestCheckoutButton({ productSlug }: { productSlug: string }) {
       return
     }
     if (data?.checkoutUrl) {
-      window.location.href = data.checkoutUrl
+      const win = window.open(data.checkoutUrl, "_blank", "noopener,noreferrer")
+      if (!win) {
+        toast.info("Redirecting to checkout...")
+        window.location.href = data.checkoutUrl
+      }
     } else {
       toast.error("Failed to create checkout")
     }
@@ -159,13 +167,36 @@ if (error) {
   return
 }
 if (data?.checkoutUrl) {
-  window.location.href = data.checkoutUrl
+  // Open in new tab (see below for why)
+  const win = window.open(data.checkoutUrl, "_blank", "noopener,noreferrer")
+  if (!win) {
+    // Popup blocked - fallback to redirect
+    toast.info("Redirecting to checkout...")
+    window.location.href = data.checkoutUrl
+  }
 }
 
 // ❌ WRONG - will cause [object Object] redirect
 const result = await guestCheckout({...})
 window.location.href = result // BROKEN!
 window.location.href = result.url // BROKEN! (it's checkoutUrl, not url)
+```
+
+### Checkout Redirect (CRITICAL)
+**Always open checkout URLs in a new tab**, not `window.location.href` directly.
+
+Why: Surgent preview runs in an iframe. Payment providers (Whop, Stripe) block iframe embedding via `X-Frame-Options`, causing "refused to connect" errors.
+
+```tsx
+// ✅ CORRECT - new tab avoids iframe issues
+const win = window.open(checkoutUrl, "_blank", "noopener,noreferrer")
+if (!win) {
+  // Popup blocked fallback
+  window.location.href = checkoutUrl
+}
+
+// ❌ WRONG - will fail in iframe context
+window.location.href = checkoutUrl
 ```
 
 ### identify() Function
