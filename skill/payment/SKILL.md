@@ -11,27 +11,27 @@ description: This enables payment setup for the project, use after convex setup 
 
 ## Install
 ```bash
-npm install @surgent-dev/surpay-convex
+bun add @surgent/pay-convex
 ```
 
 ## Backend
-File: `convex/surpay.ts`
+File: `convex/pay.ts`
 
 ```ts
-import { Surpay } from "@surgent-dev/surpay-convex"
-import { getAuthUserId } from "@convex-dev/auth/server"
+import { Surpay } from "@surgent/pay-convex"
 
-const surpay = new Surpay({
+const pay = new Surpay({
   apiKey: process.env.SURGENT_API_KEY!,
   identify: async (ctx) => {
-    const userId = await getAuthUserId(ctx)
-    if (!userId) return null
-    const user = await ctx.db.get(userId)
+    // IMPORTANT: Use ctx.auth.getUserIdentity() - works in actions!
+    // Do NOT use ctx.db (actions don't have database access)
+    const identity = await ctx.auth.getUserIdentity()
+    if (!identity) return null
     return {
-      customerId: userId,
+      customerId: identity.subject,
       customerData: {
-        name: user?.name,
-        email: user?.email,
+        name: identity.name,
+        email: identity.email,
       },
     }
   },
@@ -39,27 +39,31 @@ const surpay = new Surpay({
 
 export const {
   createCheckout,
+  guestCheckout,
   check,
+  listProducts,
   getCustomer,
   listSubscriptions,
-} = surpay.api()
+} = pay.api()
 ```
 
 ## Frontend Usage
+
+### Authenticated Checkout
 ```tsx
 import { useAction } from "convex/react"
 import { api } from "../convex/_generated/api"
 
-export function CheckoutButton({ productId }: { productId: string }) {
-  const createCheckout = useAction(api.surpay.createCheckout)
+export function CheckoutButton({ productSlug }: { productSlug: string }) {
+  const createCheckout = useAction(api.pay.createCheckout)
 
   const handleCheckout = async () => {
     const { data, error } = await createCheckout({
-      product_id: productId,
-      success_url: window.location.origin,
-      cancel_url: window.location.origin,
+      productSlug, // or productId: "prod_123"
+      successUrl: window.location.origin + "/success",
+      cancelUrl: window.location.origin + "/cancel",
     })
-    if (data?.checkout_url) window.location.href = data.checkout_url
+    if (data?.checkoutUrl) window.location.href = data.checkoutUrl
     if (error) console.error(error.message)
   }
 
@@ -67,10 +71,86 @@ export function CheckoutButton({ productId }: { productId: string }) {
 }
 ```
 
-## Products & Price information
-Products and prices can be queried from the pay mcp server.
+### Guest Checkout (Anonymous Users)
+For checkout without requiring sign-in:
+
+```tsx
+import { useAction } from "convex/react"
+import { api } from "../convex/_generated/api"
+
+// Get or create persistent guest ID
+function getGuestId(): string {
+  const key = "surgent_guest_id"
+  let id = localStorage.getItem(key)
+  if (!id) {
+    id = crypto.randomUUID()
+    localStorage.setItem(key, id)
+  }
+  return id
+}
+
+export function GuestCheckoutButton({ productSlug }: { productSlug: string }) {
+  const guestCheckout = useAction(api.pay.guestCheckout)
+
+  const handleCheckout = async () => {
+    const { data, error } = await guestCheckout({
+      productSlug,
+      customerId: getGuestId(),
+      customerEmail: "guest@example.com", // optional
+      customerName: "Guest", // optional
+      successUrl: window.location.origin + "/success",
+      cancelUrl: window.location.origin + "/cancel",
+    })
+    if (data?.checkoutUrl) window.location.href = data.checkoutUrl
+    if (error) console.error(error.message)
+  }
+
+  return <button onClick={handleCheckout}>Buy Now</button>
+}
+```
+
+### Check Access
+```tsx
+const check = useAction(api.pay.check)
+
+const hasAccess = async (productSlug: string) => {
+  const { data, error } = await check({ productSlug })
+  if (error) return false
+  return data.allowed
+}
+```
+
+### List Products
+```tsx
+const listProducts = useAction(api.pay.listProducts)
+
+const products = await listProducts({})
+// products.data = [{ product: { id, name, slug }, prices: [...] }, ...]
+```
+
+## Products & Price Information
+Products and prices can be queried from the pay MCP server using `list_products` tool, or via `listProducts` action in frontend.
+
+## Important Notes
+
+### identify() Function
+The `identify()` function runs in a Convex **action** context:
+- ✅ `ctx.auth.getUserIdentity()` - **use this!**
+- ✅ `ctx.runQuery()` / `ctx.runMutation()`
+- ❌ `ctx.db` - **NOT available in actions!**
+
+### Product ID vs Slug
+All product-related actions accept either `productId` or `productSlug`:
+```typescript
+// By slug (human-readable) - RECOMMENDED
+await createCheckout({ productSlug: "pro-plan" })
+
+// By ID
+await createCheckout({ productId: "prod_abc123" })
+```
 
 ## Checklist
 - [ ] `SURGENT_API_KEY` set in Convex dashboard (SHOULD BE DONE AFTER CONVEX SETUP)
-- [ ] `convex/surpay.ts` created with `getAuthUserId`
-- [ ] Actions exported and accessible via `api.surpay`
+- [ ] `convex/pay.ts` created with `ctx.auth.getUserIdentity()` pattern
+- [ ] Actions exported and accessible via `api.pay`
+- [ ] Run `dev-run` with `syncConvex: true` to push changes
