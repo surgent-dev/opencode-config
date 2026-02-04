@@ -68,6 +68,20 @@ try {
   toast.error(error instanceof Error ? error.message : "Operation failed")
 }
 
+// Auth errors - map Convex codes to friendly messages
+try {
+  await signIn("password", { email, password })
+} catch (error) {
+  const message = String(error)
+  if (message.includes("InvalidAccountId") || message.includes("InvalidSecret")) {
+    toast.error("Invalid email or password")
+  } else if (message.includes("TooManyFailedAttempts")) {
+    toast.error("Too many attempts, try again later")
+  } else {
+    toast.error("Authentication failed")
+  }
+}
+
 // With Convex mutations/actions
 const doAction = useMutation(api.actions.doSomething)
 
@@ -82,6 +96,7 @@ const handleClick = async () => {
 ```
 
 **Rules:**
+- **Always** run `dev-run` after each significant change (new components, hook updates, routing changes) — don't wait until the end
 - Show the **actual error message** from the backend, not generic text
 - Use `toast.error()` for failures, `toast.success()` for confirmations
 - Wrap all async operations (mutations, actions, fetches) in try-catch
