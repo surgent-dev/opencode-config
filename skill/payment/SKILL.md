@@ -8,24 +8,31 @@ description: Payment integration via Surpay. Use after Convex and auth setup.
 - Convex project initialized (`convex_create_project` called)
 - `SURGENT_API_KEY` set in Convex (auto-configured by setup)
 
-## Setup
+## Install
 
 ```bash
 bun add @surgent/pay-convex
 ```
 
-**convex/pay.ts**
+## Backend
+
+Create `convex/pay.ts`:
+
 ```ts
 import { Surpay } from "@surgent/pay-convex"
 
 const pay = new Surpay({
   apiKey: process.env.SURGENT_API_KEY!,
   identify: async (ctx) => {
+    // Use ctx.auth in actions, not ctx.db
     const identity = await ctx.auth.getUserIdentity()
     if (!identity) return null
     return {
       customerId: identity.subject,
-      customerData: { name: identity.name, email: identity.email },
+      customerData: {
+        name: identity.name,
+        email: identity.email,
+      },
     }
   },
 })
@@ -42,62 +49,141 @@ export const {
 
 ## Frontend
 
-All actions return `{ data, error }`. Open checkout in new tab (iframe blocks payment providers).
+### Response Shape
+
+All Surpay actions return `{ data, error }`. Never treat the response as a URL directly.
+
+```tsx
+// Correct
+const { data, error } = await checkout({...})
+if (error) return toast.error(error.message)
+if (data?.checkoutUrl) { ... }
+
+// Wrong - causes [object Object] redirect
+const result = await checkout({...})
+window.location.href = result
+window.location.href = result.url  // field is checkoutUrl, not url
+```
+
+### Checkout Redirect
+
+Always open checkout URLs in a new tab. Surgent preview runs in an iframe, and payment providers block iframe embedding via X-Frame-Options.
+
+```tsx
+// Correct - new tab avoids iframe issues
+const win = window.open(data.checkoutUrl, "_blank", "noopener,noreferrer")
+if (!win) window.location.href = data.checkoutUrl  // popup blocked fallback
+
+// Wrong - fails in iframe context
+window.location.href = data.checkoutUrl
+```
+
+### Authenticated Checkout
 
 ```tsx
 import { useAction } from "convex/react"
 import { api } from "../convex/_generated/api"
 import { toast } from "sonner"
 
-const checkout = useAction(api.pay.createCheckout) // or guestCheckout
+export function CheckoutButton({ productSlug }: { productSlug: string }) {
+  const createCheckout = useAction(api.pay.createCheckout)
 
-const handleCheckout = async () => {
-  const { data, error } = await checkout({
-    productSlug: "pro-plan",
-    successUrl: window.location.origin + "/success",
-    cancelUrl: window.location.origin + "/cancel",
-  })
+  const handleCheckout = async () => {
+    const { data, error } = await createCheckout({
+      productSlug,
+      successUrl: window.location.origin + "/success",
+      cancelUrl: window.location.origin + "/cancel",
+    })
 
-  if (error) return toast.error(error.message)
-  if (!data?.checkoutUrl) return toast.error("Checkout failed")
+    if (error) return toast.error(error.message)
+    if (!data?.checkoutUrl) return toast.error("Checkout failed")
 
-  // New tab to avoid iframe X-Frame-Options block
-  const win = window.open(data.checkoutUrl, "_blank", "noopener,noreferrer")
-  if (!win) window.location.href = data.checkoutUrl // popup blocked fallback
+    const win = window.open(data.checkoutUrl, "_blank", "noopener,noreferrer")
+    if (!win) window.location.href = data.checkoutUrl
+  }
+
+  return <button onClick={handleCheckout}>Subscribe</button>
 }
 ```
 
-**Guest checkout** — add `customerId` (use localStorage UUID):
+### Guest Checkout
+
+For checkout without requiring sign-in:
+
 ```tsx
-const { data, error } = await guestCheckout({
-  productSlug: "pro-plan",
-  customerId: localStorage.getItem("guest_id") || crypto.randomUUID(),
-  successUrl: "...",
-  cancelUrl: "...",
-})
+import { useAction } from "convex/react"
+import { api } from "../convex/_generated/api"
+import { toast } from "sonner"
+
+function getGuestId(): string {
+  const key = "guest_id"
+  let id = localStorage.getItem(key)
+  if (!id) {
+    id = crypto.randomUUID()
+    localStorage.setItem(key, id)
+  }
+  return id
+}
+
+export function GuestCheckoutButton({ productSlug }: { productSlug: string }) {
+  const guestCheckout = useAction(api.pay.guestCheckout)
+
+  const handleCheckout = async () => {
+    const { data, error } = await guestCheckout({
+      productSlug,
+      customerId: getGuestId(),
+      customerName: "Supporter",
+      successUrl: window.location.origin + "/success",
+      cancelUrl: window.location.origin + "/cancel",
+    })
+
+    if (error) return toast.error(error.message)
+    if (!data?.checkoutUrl) return toast.error("Checkout failed")
+
+    const win = window.open(data.checkoutUrl, "_blank", "noopener,noreferrer")
+    if (!win) window.location.href = data.checkoutUrl
+  }
+
+  return <button onClick={handleCheckout}>Buy Now</button>
+}
 ```
 
-**Check access:**
+### Check Access
+
 ```tsx
-const { data, error } = await check({ productSlug: "pro-plan" })
-const hasAccess = !error && data?.allowed
+const check = useAction(api.pay.check)
+
+const hasAccess = async (productSlug: string): Promise<boolean> => {
+  const { data, error } = await check({ productSlug })
+  if (error) return false
+  return data?.allowed ?? false
+}
 ```
 
-## Common Mistakes
+### List Products
 
 ```tsx
-// WRONG: response is { data, error }, not a URL
-window.location.href = await checkout({...})
+const listProducts = useAction(api.pay.listProducts)
 
-// WRONG: field is checkoutUrl, not url
-window.location.href = data.url
-
-// WRONG: direct redirect fails in iframe
-window.location.href = data.checkoutUrl
+const products = await listProducts({})
+// products.data = [{ product: { id, name, slug }, prices: [...] }, ...]
 ```
 
 ## Notes
 
-- `identify()` runs in action context: use `ctx.auth.getUserIdentity()`, not `ctx.db`
-- Use `productSlug` (readable) over `productId`
-- Query products via `listProducts` action or `list_products` MCP tool
+**identify() context**: Runs in a Convex action. Use `ctx.auth.getUserIdentity()` or `ctx.runQuery()`. Do not use `ctx.db` (not available in actions).
+
+**Product identifiers**: All actions accept `productSlug` or `productId`. Prefer slug for readability.
+
+```ts
+await createCheckout({ productSlug: "pro-plan" })
+await createCheckout({ productId: "prod_abc123" })
+```
+
+**Products & prices**: Query via `listProducts` action or `list_products` MCP tool.
+
+## Checklist
+
+- [ ] `SURGENT_API_KEY` set in Convex
+- [ ] `convex/pay.ts` created with identify pattern
+- [ ] Run `dev-run` with `syncConvex: true` to push changes
