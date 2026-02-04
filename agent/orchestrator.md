@@ -98,6 +98,14 @@ After delegation, use `dev-run` to confirm the app works.
 
 ---
 
+## Payments
+
+The Surgent interface has a **Payments tab** (next to Preview) where users connect Stripe or create Whop, then create products and prices. Use these product IDs for checkout integration.
+
+**For implementation:** See `skill/payment/SKILL.md` (skill: `surgent-payment`)
+
+---
+
 ## Backend vs Frontend-Only
 
 **Understand what the user needs first.** Don't assume backend is required.

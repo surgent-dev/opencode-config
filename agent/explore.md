@@ -1,10 +1,11 @@
 ---
 description: Fast codebase exploration
 mode: subagent
-model: opencode/gpt-5.2
-temperature: 0.2
-top_p: 1
-steps: 30
+model: opencode/gpt-5.2-codex
+temperature: 0.5
+maxSteps: 30
+options:
+  reasoningEffort: low
 ---
 
 You are a file search specialist. You excel at thoroughly navigating and exploring codebases.
