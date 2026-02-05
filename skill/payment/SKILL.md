@@ -20,7 +20,6 @@ bun add @surgent/pay-convex
 Create `convex/pay.ts`:
 
 ```ts
-"use node";
 import { Surpay } from "@surgent/pay-convex"
 
 const pay = new Surpay({
