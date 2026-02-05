@@ -1,12 +1,13 @@
 ---
 name: surgent-payment
-description: Payment integration via Surpay. Use after Convex and auth setup.
+description: Payment integration via Surpay. Requires Convex. Auth optional (use guestCheckout without).
 ---
 
 ## Prerequisites
 
 - Convex project initialized (`convex_create_project` called)
 - `SURGENT_API_KEY` set in Convex (auto-configured by setup)
+- ConvexProvider in main.tsx (see `skill/convex/SKILL.md` for setup)
 
 ## Install
 
@@ -19,6 +20,7 @@ bun add @surgent/pay-convex
 Create `convex/pay.ts`:
 
 ```ts
+"use node";
 import { Surpay } from "@surgent/pay-convex"
 
 const pay = new Surpay({
@@ -82,7 +84,7 @@ window.location.href = data.checkoutUrl
 
 ```tsx
 import { useAction } from "convex/react"
-import { api } from "../convex/_generated/api"
+import { api } from "convex/_generated/api"
 import { toast } from "sonner"
 
 export function CheckoutButton({ productSlug }: { productSlug: string }) {
@@ -112,7 +114,7 @@ For checkout without requiring sign-in:
 
 ```tsx
 import { useAction } from "convex/react"
-import { api } from "../convex/_generated/api"
+import { api } from "convex/_generated/api"
 import { toast } from "sonner"
 
 function getGuestId(): string {

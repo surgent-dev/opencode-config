@@ -54,6 +54,18 @@ Before coding, commit to an aesthetic direction:
 
 Single-feature apps go on the home page (`/`) — don't create sub-routes like `/kanban`. Only use sub-routes for apps with multiple distinct pages.
 
+## Imports
+
+```tsx
+// src/ imports - use @/ alias
+import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
+
+// Convex imports - use direct path (NOT @/)
+import { useQuery, useMutation, useAction } from "convex/react"
+import { api } from "convex/_generated/api"
+```
+
 ## Error Handling
 
 **Always surface errors to users via toast notifications.** Never silently fail.

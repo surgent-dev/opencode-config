@@ -10,6 +10,66 @@ description: "Use before designing or implementing Convex backend changes: auth,
 - This auto-configures auth keys (SITE_URL, JWT_PRIVATE_KEY, JWKS) on the Convex deployment
 - For authentication, see `skill/convex-auth/SKILL.md`
 
+### Required files when creating convex folder
+
+```
+convex/
+├── tsconfig.json    # REQUIRED - see below
+├── schema.ts        # Database schema
+└── [functions].ts   # Your queries/mutations/actions
+```
+
+**convex/tsconfig.json** (always create this):
+```json
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "lib": ["ES2021", "dom"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "skipLibCheck": true,
+    "types": ["node"],
+    "allowJs": true,
+    "strict": true,
+    "jsx": "react-jsx",
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "noEmit": true
+  },
+  "include": ["./**/*"],
+  "exclude": ["./_generated"]
+}
+```
+
+## Frontend setup
+
+Add ConvexProvider to `src/main.tsx`:
+
+```tsx
+import { ConvexProvider, ConvexReactClient } from "convex/react"
+
+const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL)
+
+createRoot(document.getElementById("root")!).render(
+  <StrictMode>
+    <ConvexProvider client={convex}>
+      {/* your app */}
+    </ConvexProvider>
+  </StrictMode>
+)
+```
+
+Use hooks in components:
+
+```tsx
+import { useQuery, useMutation, useAction } from "convex/react"
+import { api } from "convex/_generated/api"
+
+const data = useQuery(api.messages.list)
+const send = useMutation(api.messages.send)
+```
+
 ## Function guidelines
 ### New function syntax
 - ALWAYS use the new function syntax for Convex functions. For example:

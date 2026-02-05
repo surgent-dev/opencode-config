@@ -74,7 +74,9 @@ convex/                   # Created after convex_create_project
 
 **Stack**: React 19, Vite 7, TypeScript, Tailwind CSS 4, React Router 7, Zustand, React Query, React Hook Form + Zod
 
-**Imports**: Always use `@/` alias (e.g., `import { Button } from '@/components/ui/button'`)
+**Imports**:
+- `src/` → use `@/` alias: `import { Button } from '@/components/ui/button'`
+- `convex/` → use direct path: `import { api } from "convex/_generated/api"`
 
 ---
 

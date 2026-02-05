@@ -120,7 +120,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
 ```tsx
 import { useAuthActions } from "@convex-dev/auth/react";
 import { useState } from "react";
-import { toast } from "sonner"; // or your toast library
+import { toast } from "sonner";
 
 export function AuthForm() {
   const { signIn } = useAuthActions();
