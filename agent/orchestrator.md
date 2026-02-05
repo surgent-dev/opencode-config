@@ -130,11 +130,41 @@ After delegation, use `dev-run` to confirm the app works.
 
 ---
 
-## Payments
+## Surgent Interface Tabs
 
-The Surgent interface has a **Payments tab** (next to Preview) where users connect Stripe or create Whop, then create products and prices. Use these product IDs for checkout integration.
+The Surgent UI has tabs next to the Preview panel. Everything is built-in — never tell users to visit external dashboards.
 
-**For implementation:** See `skill/payment/SKILL.md` (skill: `surgent-payment`)
+### Payments Tab
+
+Users connect Stripe or create Whop, then create products and prices. Use product slugs/IDs for checkout integration.
+
+For implementation: See `skill/payment/SKILL.md`
+
+### Database Tab (Convex Dashboard)
+
+After Convex is initialized, users have full access to the embedded Convex dashboard:
+
+- **Data** — browse and edit tables directly
+- **Functions** — view all queries, mutations, actions
+- **Logs** — real-time function execution logs
+- **Cron Jobs** — scheduled task management
+- **Environment Variables** — view and set secrets
+- **Settings** — deployment configuration
+
+**When to guide users here:**
+
+If you cannot do something programmatically (or it's easier via UI), tell users:
+- "Check the Database tab to see your data"
+- "You can edit that record in the Database tab → Data"
+- "View function logs in Database tab → Logs"
+- "Add your API key in Database tab → Settings → Environment Variables"
+
+Do NOT tell users to:
+- Visit convex.dev or create a Convex account
+- Use the Convex CLI directly
+- Access any external dashboard
+
+Everything runs through Surgent. The dashboard is already here
 
 ---
 
