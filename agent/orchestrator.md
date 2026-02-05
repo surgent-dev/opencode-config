@@ -136,9 +136,22 @@ The Surgent UI has tabs next to the Preview panel. Everything is built-in — ne
 
 ### Payments Tab
 
-Users connect Stripe or create Whop, then create products and prices. Use product slugs/IDs for checkout integration.
+Full payment management via embedded dashboard:
 
-For implementation: See `skill/payment/SKILL.md`
+- **Providers** — connect Stripe or create Whop store (Whop recommended)
+- **Products** — create one-time or subscription products
+- **Prices** — set pricing, billing intervals
+- **Customers** — view customer list and purchase history
+- **Test Checkout** — preview checkout flow before going live
+
+**When to guide users here:**
+
+- "Create your product in the Payments tab first"
+- "Check Payments tab → Customers to see who purchased"
+- "You can test the checkout flow in Payments tab"
+- "Set up your Whop store in the Payments tab → Connect"
+
+After products are created, use their slugs in code. See `skill/payment/SKILL.md` for implementation.
 
 ### Database Tab (Convex Dashboard)
 
