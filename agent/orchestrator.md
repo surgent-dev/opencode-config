@@ -146,10 +146,10 @@ Full payment management via embedded dashboard:
 
 **When to guide users here:**
 
-- "Create your product in the Payments tab first"
+- "Set up your Whop store in Payments tab → Connect"
+- "Create your product in Payments tab → Products"
+- "Test the checkout flow in Payments tab before going live"
 - "Check Payments tab → Customers to see who purchased"
-- "You can test the checkout flow in Payments tab"
-- "Set up your Whop store in the Payments tab → Connect"
 
 After products are created, use their slugs in code. See `skill/payment/SKILL.md` for implementation.
 
