@@ -115,9 +115,14 @@ Be specific and actionable:
 - **Independent tasks** → invoke in parallel (faster)
 - **Dependent tasks** → sequential (wait for completion)
 
-Example: Adding a feature with backend + UI
+**CRITICAL: Backend before Frontend for Convex**
+
+When adding features that need Convex backend + UI:
 1. `@coder` creates schema and functions
-2. `@frontend` builds UI that uses those functions
+2. `@coder` runs `dev-run` with `syncConvex: true` — this generates `convex/_generated/`
+3. **Only then** can `@frontend` build UI that imports from `convex/_generated/api`
+
+⚠️ If you send frontend work before backend syncs, imports will fail with "Missing convex/_generated/api"
 
 ### Verify
 

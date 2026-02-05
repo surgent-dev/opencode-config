@@ -119,7 +119,7 @@ throw new ConvexError("ITEM_NOT_FOUND")
 
 ## Rules
 
-- **Always** run `dev-run` after each significant change (schema updates, new functions, API changes) — don't wait until the end
+- **Always** run `dev-run` with `syncConvex: true` after creating/modifying convex files — this generates `convex/_generated/` which frontend needs for imports
 - **Always** use validators for args
 - **Never** add return validators initially
 - **Never** add built-in indexes (`by_id`, `by_creation_time`)
@@ -128,6 +128,17 @@ throw new ConvexError("ITEM_NOT_FOUND")
 - Actions: add `"use node";`, no `ctx.db` access
 - Store `Id<"_storage">` not URLs for files
 - **Always** throw user-friendly error messages (shown in UI toasts)
+
+## CRITICAL: Convex Codegen
+
+After creating or modifying any convex files (`schema.ts`, `*.ts` functions), you MUST run `dev-run` with `syncConvex: true` before returning.
+
+This generates `convex/_generated/` which contains:
+- `api.js` / `api.d.ts` — function references for frontend imports
+- `server.js` / `server.d.ts` — typed query/mutation/action helpers
+- `dataModel.d.ts` — schema types
+
+**Without this step, frontend imports like `import { api } from "convex/_generated/api"` will fail.**
 
 ## Limits to Design Around
 
@@ -202,5 +213,6 @@ Also update `convex/tsconfig.json`: `"moduleResolution": "Bundler"`, `"skipLibCh
 - path/to/file.ts - [what changed]
 
 ## Verify
-- Use `dev-run` tool
+- Ran `dev-run` with `syncConvex: true`
+- Confirmed `convex/_generated/` was created (required for frontend imports)
 ```

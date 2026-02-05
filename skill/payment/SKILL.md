@@ -187,4 +187,5 @@ await createCheckout({ productId: "prod_abc123" })
 
 - [ ] `SURGENT_API_KEY` set in Convex
 - [ ] `convex/pay.ts` created with identify pattern
-- [ ] Run `dev-run` with `syncConvex: true` to push changes
+- [ ] Run `dev-run` with `syncConvex: true` to push changes and generate `convex/_generated/`
+- [ ] **Wait for sync to complete** before frontend work — frontend imports require `_generated/api.ts`

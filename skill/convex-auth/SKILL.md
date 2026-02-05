@@ -207,5 +207,6 @@ convex/
 - [ ] `convex/auth.ts` created with Password provider
 - [ ] `convex/http.ts` created with auth routes
 - [ ] `convex/schema.ts` has `...authTables` spread
+- [ ] Run `dev-run` with `syncConvex: true` — generates `convex/_generated/` needed for frontend imports
+- [ ] **Wait for sync** before frontend work
 - [ ] Frontend wrapped with `ConvexAuthProvider`
-- [ ] Run `dev-run` with `syncConvex: true` to push changes
