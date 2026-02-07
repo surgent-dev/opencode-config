@@ -83,7 +83,7 @@ window.location.href = data.checkoutUrl
 
 ```tsx
 import { useAction } from "convex/react"
-import { api } from "convex/_generated/api"
+import { api } from "@convex/api"
 import { toast } from "sonner"
 
 export function CheckoutButton({ productSlug }: { productSlug: string }) {
@@ -113,7 +113,7 @@ For checkout without requiring sign-in:
 
 ```tsx
 import { useAction } from "convex/react"
-import { api } from "convex/_generated/api"
+import { api } from "@convex/api"
 import { toast } from "sonner"
 
 function getGuestId(): string {

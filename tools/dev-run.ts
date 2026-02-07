@@ -45,7 +45,13 @@ export default tool({
         output.push(result.stderr.toString())
         return output.join('\n')
       }
-      output.push('✓ Convex synced')
+      // Verify _generated/ was actually created
+      const apiFile = Bun.file('convex/_generated/api.js')
+      if (await apiFile.exists()) {
+        output.push('✓ Convex synced (convex/_generated/api.js verified)')
+      } else {
+        output.push('⚠ Convex sync ran but convex/_generated/api.js not found — imports will fail')
+      }
     }
 
     // Run lint
@@ -65,7 +71,10 @@ export default tool({
     for (let i = 0; i < commands.length; i++) {
       const name = commands.length > 1 ? `${cfg.name}:${i + 1}` : cfg.name
       if (await isPm2Online(name)) {
-        output.push(`✓ ${name} already online`)
+        // Flush stale logs before restart so dev-logs only shows fresh output
+        await $`pm2 flush ${name}`.nothrow().quiet()
+        await $`pm2 restart ${name}`.nothrow().quiet()
+        output.push(`✓ ${name} restarted (logs flushed)`)
       } else {
         const result = await $`pm2 start ${commands[i]} --name ${name}`.nothrow().quiet()
         if (result.exitCode !== 0) {

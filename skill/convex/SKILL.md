@@ -30,14 +30,14 @@ The `convex/_generated/` folder is created by running `dev-run` with `syncConvex
 **This must happen BEFORE frontend can import from Convex:**
 ```tsx
 // This import FAILS if _generated doesn't exist
-import { api } from "convex/_generated/api"
+import { api } from "@convex/api"
 ```
 
 **Workflow:**
 1. Create convex files (`schema.ts`, functions)
 2. Run `dev-run` with `syncConvex: true`
 3. Wait for sync to complete
-4. Now frontend can safely import from `convex/_generated/api`
+4. Now frontend can safely import from `@convex/api`
 
 **convex/tsconfig.json** (always create this):
 ```json
@@ -84,7 +84,7 @@ Use hooks in components:
 
 ```tsx
 import { useQuery, useMutation, useAction } from "convex/react"
-import { api } from "convex/_generated/api"
+import { api } from "@convex/api"
 
 const data = useQuery(api.messages.list)
 const send = useMutation(api.messages.send)
@@ -221,8 +221,8 @@ export const g = query({
 
 ### Function references
 - Function references are pointers to registered Convex functions.
-- Use the `api` object defined by the framework in `convex/_generated/api.ts` to call public functions registered with `query`, `mutation`, or `action`.
-- Use the `internal` object defined by the framework in `convex/_generated/api.ts` to call internal (or private) functions registered with `internalQuery`, `internalMutation`, or `internalAction`.
+- Use the `api` object to call public functions registered with `query`, `mutation`, or `action`. In frontend code, import as `import { api } from "@convex/api"`. In Convex functions, import as `import { api } from "./_generated/api"`.
+- Use the `internal` object to call internal (or private) functions registered with `internalQuery`, `internalMutation`, or `internalAction`. In Convex functions, import as `import { internal } from "./_generated/api"`.
 - Convex uses file-based routing, so a public function defined in `convex/example.ts` named `f` has a function reference of `api.example.f`.
 - A private function defined in `convex/example.ts` named `g` has a function reference of `internal.example.g`.
 - Functions can also registered within directories nested within the `convex/` folder. For example, a public function `h` defined in `convex/messages/access.ts` has a function reference of `api.messages.access.h`.

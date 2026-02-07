@@ -138,7 +138,7 @@ This generates `convex/_generated/` which contains:
 - `server.js` / `server.d.ts` — typed query/mutation/action helpers
 - `dataModel.d.ts` — schema types
 
-**Without this step, frontend imports like `import { api } from "convex/_generated/api"` will fail.**
+**Without this step, frontend imports like `import { api } from "@convex/api"` will fail.**
 
 ## Limits to Design Around
 

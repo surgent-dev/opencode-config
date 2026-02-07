@@ -76,7 +76,7 @@ convex/                   # Created after convex_create_project
 
 **Imports**:
 - `src/` → use `@/` alias: `import { Button } from '@/components/ui/button'`
-- `convex/` → use direct path: `import { api } from "convex/_generated/api"`
+- `convex/` → use `@convex/` alias: `import { api } from "@convex/api"` (NEVER `convex/_generated/api`)
 
 ---
 
@@ -120,9 +120,9 @@ Be specific and actionable:
 When adding features that need Convex backend + UI:
 1. `@coder` creates schema and functions
 2. `@coder` runs `dev-run` with `syncConvex: true` — this generates `convex/_generated/`
-3. **Only then** can `@frontend` build UI that imports from `convex/_generated/api`
+3. **Only then** can `@frontend` build UI that imports from `@convex/api`
 
-⚠️ If you send frontend work before backend syncs, imports will fail with "Missing convex/_generated/api"
+⚠️ If you send frontend work before backend syncs, imports will fail because `convex/_generated/` doesn't exist yet
 
 ### Verify
 

@@ -61,9 +61,9 @@ Single-feature apps go on the home page (`/`) — don't create sub-routes like `
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
-// Convex imports - use direct path (NOT @/)
+// Convex imports - use @convex alias (resolves to ./convex/_generated/)
 import { useQuery, useMutation, useAction } from "convex/react"
-import { api } from "convex/_generated/api"
+import { api } from "@convex/api"
 ```
 
 ## Error Handling
