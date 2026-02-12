@@ -1,7 +1,7 @@
 ---
 description: Frontend specialist - React, Tailwind, shadcn/ui, UI components, styling
 mode: subagent
-model: opencode/gemini-3-pro
+model: opencode/gemini-3-flash
 temperature: 0.7
 maxSteps: 30
 tools:
