@@ -1,7 +1,7 @@
 ---
 description: Coordinates tasks - delegates to @coder (backend) and @frontend (UI)
 mode: primary
-model: opencode/claude-opus-4-6
+model: opencode/claude-opus-4-5
 temperature: 0.7
 options:
   reasoningEffort: xhigh
