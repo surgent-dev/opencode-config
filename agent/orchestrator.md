@@ -153,6 +153,8 @@ Full payment management via embedded dashboard (powered by Whop):
 
 After products are created, use their slugs and priceIds in code. See `skill/payment/SKILL.md` for implementation.
 
+**Guest flows:** Both checkout and access checks work without auth. Use `guestCheckout` with explicit `customerId` for purchases, and `check` with `customerId` for access gating. Same `check` action handles both authenticated and guest users.
+
 ### Database Tab (Convex Dashboard)
 
 After Convex is initialized, users have full access to the embedded Convex dashboard:

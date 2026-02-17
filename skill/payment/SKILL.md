@@ -119,16 +119,13 @@ export function CheckoutButton({ productSlug, priceId }: { productSlug: string; 
 }
 ```
 
-### Guest Checkout
+### Guest ID
 
-For checkout without requiring sign-in:
+Guest flows (checkout + access check) need a stable `customerId` that persists across the session. **Create the helper once in a shared file** (e.g. `src/lib/guest.ts`) and import it everywhere — never generate a new ID on each call.
 
-```tsx
-import { useAction } from "convex/react"
-import { api } from "@convex/api"
-import { toast } from "sonner"
-
-function getGuestId(): string {
+```ts
+// src/lib/guest.ts
+export function getGuestId(): string {
   const key = "guest_id"
   let id = localStorage.getItem(key)
   if (!id) {
@@ -137,6 +134,19 @@ function getGuestId(): string {
   }
   return id
 }
+```
+
+**Why this matters:** The guest ID links the checkout to the access check. If you generate a new UUID every time, the customer who paid will have a different ID than the one checking access — so `check` returns `allowed: false`.
+
+### Guest Checkout
+
+For checkout without requiring sign-in:
+
+```tsx
+import { useAction } from "convex/react"
+import { api } from "@convex/api"
+import { toast } from "sonner"
+import { getGuestId } from "@/lib/guest"
 
 export function GuestCheckoutButton({ productSlug, priceId }: { productSlug: string; priceId: string }) {
   const guestCheckout = useAction(api.pay.guestCheckout)
@@ -161,7 +171,7 @@ export function GuestCheckoutButton({ productSlug, priceId }: { productSlug: str
 }
 ```
 
-### Check Access
+### Check Access (Authenticated)
 
 ```tsx
 const check = useAction(api.pay.check)
@@ -172,6 +182,27 @@ const hasAccess = async (productSlug: string): Promise<boolean> => {
   return data?.allowed ?? false
 }
 ```
+
+### Check Access (Guest)
+
+Uses the same `getGuestId()` from checkout — same customer, same access:
+
+```tsx
+import { getGuestId } from "@/lib/guest"
+
+const check = useAction(api.pay.check)
+
+const hasAccess = async (productSlug: string): Promise<boolean> => {
+  const { data, error } = await check({
+    productSlug,
+    customerId: getGuestId(),
+  })
+  if (error) return false
+  return data?.allowed ?? false
+}
+```
+
+`check` accepts an optional `customerId`. If provided, used directly (guest). If omitted, resolved from `identify()` (authenticated). Same action, both modes.
 
 ### List Products
 

@@ -200,6 +200,20 @@ Also update `convex/tsconfig.json`: `"moduleResolution": "Bundler"`, `"skipLibCh
 | `convex_set_env_vars` | Set API keys and secrets |
 | `convex_list_env_vars` | Check existing env vars |
 
+## Payment Integration (Surpay)
+
+See `skill/payment/SKILL.md` for full details. Key pattern for `check`:
+
+```ts
+// Authenticated — customerId resolved from identify()
+await check({ productSlug: "pro" })
+
+// Guest — pass customerId explicitly (same one used in guestCheckout)
+await check({ productSlug: "pro", customerId: guestId })
+```
+
+`check` accepts an optional `customerId`. If provided, used directly. If omitted, falls back to `identify()`.
+
 ## Output Format
 
 ```
