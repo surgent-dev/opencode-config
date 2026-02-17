@@ -197,7 +197,7 @@ await createCheckout({ productId: "prod_abc123", priceId: "price_456" })
 
 **Products & prices**: Query via `listProducts` action or `list_products` MCP tool.
 
-**Payment processor**: Whop (not Stripe). Checkout URLs are Whop hosted pages. There is no separate `cancelUrl` — only `successUrl` which maps to the redirect after checkout.
+**Payment processor**: Surgent Pay (powered by Whop). Checkout URLs are hosted pages. There is no separate `cancelUrl` — only `successUrl` which maps to the redirect after checkout.
 
 ## Checklist
 

@@ -44,7 +44,7 @@ The orchestrator delegates automatically. You can also call agents directly:
 @frontend Create a responsive Navbar with Tailwind
 @reviewer Review src/auth/ for security issues
 @explorer Find all usages of useAuth hook
-@research Find Stripe API docs for payment intents
+@research Find Surgent Pay API docs for checkout
 @writer Document the API endpoints
 ```
 
