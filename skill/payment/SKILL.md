@@ -58,12 +58,24 @@ All Surpay actions return `{ data, error }`. Never treat the response as a URL d
 // Correct
 const { data, error } = await checkout({...})
 if (error) return toast.error(error.message)
-if (data?.checkoutUrl) { ... }
+if (data?.purchaseUrl) { ... }
 
 // Wrong - causes [object Object] redirect
 const result = await checkout({...})
 window.location.href = result
-window.location.href = result.url  // field is checkoutUrl, not url
+window.location.href = result.url  // field is purchaseUrl, not url
+```
+
+### Checkout Response
+
+The checkout response shape is:
+```ts
+{
+  id: string          // checkout session ID
+  sessionId: string   // internal session ID
+  purchaseUrl: string | null  // redirect URL for payment
+  status: string      // "creating" | "open" | "completed" | "failed"
+}
 ```
 
 ### Checkout Redirect
@@ -72,11 +84,11 @@ Always open checkout URLs in a new tab. Surgent preview runs in an iframe, and p
 
 ```tsx
 // Correct - new tab avoids iframe issues
-const win = window.open(data.checkoutUrl, "_blank", "noopener,noreferrer")
-if (!win) window.location.href = data.checkoutUrl  // popup blocked fallback
+const win = window.open(data.purchaseUrl, "_blank", "noopener,noreferrer")
+if (!win && data.purchaseUrl) window.location.href = data.purchaseUrl  // popup blocked fallback
 
 // Wrong - fails in iframe context
-window.location.href = data.checkoutUrl
+window.location.href = data.purchaseUrl
 ```
 
 ### Authenticated Checkout
@@ -86,21 +98,21 @@ import { useAction } from "convex/react"
 import { api } from "@convex/api"
 import { toast } from "sonner"
 
-export function CheckoutButton({ productSlug }: { productSlug: string }) {
+export function CheckoutButton({ productSlug, priceId }: { productSlug: string; priceId: string }) {
   const createCheckout = useAction(api.pay.createCheckout)
 
   const handleCheckout = async () => {
     const { data, error } = await createCheckout({
       productSlug,
+      priceId,
       successUrl: window.location.origin + "/success",
-      cancelUrl: window.location.origin + "/cancel",
     })
 
     if (error) return toast.error(error.message)
-    if (!data?.checkoutUrl) return toast.error("Checkout failed")
+    if (!data?.purchaseUrl) return toast.error("Checkout failed")
 
-    const win = window.open(data.checkoutUrl, "_blank", "noopener,noreferrer")
-    if (!win) window.location.href = data.checkoutUrl
+    const win = window.open(data.purchaseUrl, "_blank", "noopener,noreferrer")
+    if (!win) window.location.href = data.purchaseUrl
   }
 
   return <button onClick={handleCheckout}>Subscribe</button>
@@ -126,23 +138,23 @@ function getGuestId(): string {
   return id
 }
 
-export function GuestCheckoutButton({ productSlug }: { productSlug: string }) {
+export function GuestCheckoutButton({ productSlug, priceId }: { productSlug: string; priceId: string }) {
   const guestCheckout = useAction(api.pay.guestCheckout)
 
   const handleCheckout = async () => {
     const { data, error } = await guestCheckout({
       productSlug,
+      priceId,
       customerId: getGuestId(),
       customerName: "Supporter",
       successUrl: window.location.origin + "/success",
-      cancelUrl: window.location.origin + "/cancel",
     })
 
     if (error) return toast.error(error.message)
-    if (!data?.checkoutUrl) return toast.error("Checkout failed")
+    if (!data?.purchaseUrl) return toast.error("Checkout failed")
 
-    const win = window.open(data.checkoutUrl, "_blank", "noopener,noreferrer")
-    if (!win) window.location.href = data.checkoutUrl
+    const win = window.open(data.purchaseUrl, "_blank", "noopener,noreferrer")
+    if (!win) window.location.href = data.purchaseUrl
   }
 
   return <button onClick={handleCheckout}>Buy Now</button>
@@ -176,12 +188,16 @@ const products = await listProducts({})
 
 **Product identifiers**: All actions accept `productSlug` or `productId`. Prefer slug for readability.
 
+**priceId is required**: The Convex wrapper requires `priceId` for both `createCheckout` and `guestCheckout`.
+
 ```ts
-await createCheckout({ productSlug: "pro-plan" })
-await createCheckout({ productId: "prod_abc123" })
+await createCheckout({ productSlug: "pro-plan", priceId: "price_456" })
+await createCheckout({ productId: "prod_abc123", priceId: "price_456" })
 ```
 
 **Products & prices**: Query via `listProducts` action or `list_products` MCP tool.
+
+**Payment processor**: Whop (not Stripe). Checkout URLs are Whop hosted pages. There is no separate `cancelUrl` — only `successUrl` which maps to the redirect after checkout.
 
 ## Checklist
 
