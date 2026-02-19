@@ -82,10 +82,15 @@ The checkout response shape is:
 
 Always open checkout URLs in a new tab. Surgent preview runs in an iframe, and payment providers block iframe embedding via X-Frame-Options.
 
+**Never use `window.location.href` as a fallback.** In the iframe context, both `window.open` and the fallback fire, causing two payment pages to open simultaneously.
+
 ```tsx
-// Correct - new tab avoids iframe issues
+// Correct - single new tab, no fallback
+window.open(data.purchaseUrl, "_blank", "noopener,noreferrer")
+
+// Wrong - causes double navigation in iframe context
 const win = window.open(data.purchaseUrl, "_blank", "noopener,noreferrer")
-if (!win && data.purchaseUrl) window.location.href = data.purchaseUrl  // popup blocked fallback
+if (!win) window.location.href = data.purchaseUrl
 
 // Wrong - fails in iframe context
 window.location.href = data.purchaseUrl
@@ -111,8 +116,7 @@ export function CheckoutButton({ productSlug, priceId }: { productSlug: string; 
     if (error) return toast.error(error.message)
     if (!data?.purchaseUrl) return toast.error("Checkout failed")
 
-    const win = window.open(data.purchaseUrl, "_blank", "noopener,noreferrer")
-    if (!win) window.location.href = data.purchaseUrl
+    window.open(data.purchaseUrl, "_blank", "noopener,noreferrer")
   }
 
   return <button onClick={handleCheckout}>Subscribe</button>
@@ -163,8 +167,7 @@ export function GuestCheckoutButton({ productSlug, priceId }: { productSlug: str
     if (error) return toast.error(error.message)
     if (!data?.purchaseUrl) return toast.error("Checkout failed")
 
-    const win = window.open(data.purchaseUrl, "_blank", "noopener,noreferrer")
-    if (!win) window.location.href = data.purchaseUrl
+    window.open(data.purchaseUrl, "_blank", "noopener,noreferrer")
   }
 
   return <button onClick={handleCheckout}>Buy Now</button>
