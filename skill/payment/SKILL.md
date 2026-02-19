@@ -229,6 +229,15 @@ await createCheckout({ productSlug: "pro-plan", priceId: "price_456" })
 await createCheckout({ productId: "prod_abc123", priceId: "price_456" })
 ```
 
+**NEVER hardcode priceId values.** Price IDs are different between sandbox (test) and live (production) environments. A hardcoded sandbox priceId will break production checkout. Always fetch prices dynamically at runtime via `listProducts`:
+
+```tsx
+const products = await listProducts({})
+const price = products.data?.[0]?.prices?.[0]
+// Use price.id — never a string literal
+await guestCheckout({ productSlug: product.slug, priceId: price.id, ... })
+```
+
 **Products & prices**: Query via `listProducts` action or `list_products` MCP tool.
 
 **Payment processor**: Surgent Pay (powered by Whop). Checkout URLs are hosted pages. There is no separate `cancelUrl` — only `successUrl` which maps to the redirect after checkout.
