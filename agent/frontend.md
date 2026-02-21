@@ -108,7 +108,8 @@ const handleClick = async () => {
 ```
 
 **Rules:**
-- **Always** run `dev-run` after each significant change (new components, hook updates, routing changes) — don't wait until the end
+- **Always** run `bun run lint` to type-check after making changes
+- **Never** run `dev-run` — the orchestrator handles build and dev server
 - Show the **actual error message** from the backend, not generic text
 - Use `toast.error()` for failures, `toast.success()` for confirmations
 - Wrap all async operations (mutations, actions, fetches) in try-catch
@@ -127,7 +128,6 @@ const handleClick = async () => {
 
 | Tool | When to Use |
 |------|-------------|
-| `dev-run` | Build project and restart dev server |
 | `dev-logs` | Debug runtime errors, check console output |
 
 ## Output Format

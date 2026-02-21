@@ -119,7 +119,9 @@ throw new ConvexError("ITEM_NOT_FOUND")
 
 ## Rules
 
-- **Always** run `dev-run` with `syncConvex: true` after creating/modifying convex files — this generates `convex/_generated/` which frontend needs for imports
+- **Always** run `bun run lint` to type-check after making changes
+- **Always** run `bun run dev:convex` after creating/modifying Convex files — this syncs and generates `convex/_generated/`
+- **Never** run `dev-run` — the orchestrator handles build and dev server
 - **Always** use validators for args
 - **Never** add return validators initially
 - **Never** add built-in indexes (`by_id`, `by_creation_time`)
@@ -128,17 +130,6 @@ throw new ConvexError("ITEM_NOT_FOUND")
 - Actions: add `"use node";`, no `ctx.db` access
 - Store `Id<"_storage">` not URLs for files
 - **Always** throw user-friendly error messages (shown in UI toasts)
-
-## CRITICAL: Convex Codegen
-
-After creating or modifying any convex files (`schema.ts`, `*.ts` functions), you MUST run `dev-run` with `syncConvex: true` before returning.
-
-This generates `convex/_generated/` which contains:
-- `api.js` / `api.d.ts` — function references for frontend imports
-- `server.js` / `server.d.ts` — typed query/mutation/action helpers
-- `dataModel.d.ts` — schema types
-
-**Without this step, frontend imports like `import { api } from "@convex/api"` will fail.**
 
 ## Limits to Design Around
 
@@ -194,7 +185,6 @@ Also update `convex/tsconfig.json`: `"moduleResolution": "Bundler"`, `"skipLibCh
 
 | Tool | When to Use |
 |------|-------------|
-| `dev-run` with `syncConvex: true` | Build project, sync Convex, restart dev server — **check output for config errors** |
 | `convex-logs` | Debug function errors (use `success: true` for all logs). Fallback: `timeout 3 bunx convex logs --history 50 --success` |
 | `convex_create_project` | Initialize new Convex project |
 | `convex_set_env_vars` | Set API keys and secrets |
@@ -227,6 +217,6 @@ await check({ productSlug: "pro", customerId: guestId })
 - path/to/file.ts - [what changed]
 
 ## Verify
-- Ran `dev-run` with `syncConvex: true`
-- Confirmed `convex/_generated/` was created (required for frontend imports)
+- Ran `bun run lint` — no type errors
+- Ran `bun run dev:convex` (if Convex files changed)
 ```
