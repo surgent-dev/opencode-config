@@ -127,7 +127,7 @@ const handleClick = async () => {
 
 | Tool | When to Use |
 |------|-------------|
-| `dev-run` | Start dev server and run lint |
+| `dev-run` | Build project and restart dev server |
 | `dev-logs` | Debug runtime errors, check console output |
 
 ## Output Format

@@ -247,7 +247,7 @@ For detailed patterns, see `skill/convex-auth/SKILL.md`.
 
 | Tool | When to Use |
 |------|-------------|
-| `dev-run` | Start dev server and run lint |
+| `dev-run` | Build project and restart dev server |
 | `dev-run` with `syncConvex: true` | After Convex schema/function changes |
 | `dev-logs` | Debug runtime errors, check server output |
 | `convex-logs` | Debug Convex function errors (use `success: true` for all logs). Fallback: `timeout 3 bunx convex logs --history 50 --success` |

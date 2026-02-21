@@ -194,7 +194,7 @@ Also update `convex/tsconfig.json`: `"moduleResolution": "Bundler"`, `"skipLibCh
 
 | Tool | When to Use |
 |------|-------------|
-| `dev-run` with `syncConvex: true` | After schema/function changes — **check output for config errors** |
+| `dev-run` with `syncConvex: true` | Build project, sync Convex, restart dev server — **check output for config errors** |
 | `convex-logs` | Debug function errors (use `success: true` for all logs). Fallback: `timeout 3 bunx convex logs --history 50 --success` |
 | `convex_create_project` | Initialize new Convex project |
 | `convex_set_env_vars` | Set API keys and secrets |
