@@ -90,6 +90,20 @@ const data = useQuery(api.messages.list)
 const send = useMutation(api.messages.send)
 ```
 
+## Explicit table names (1.31+)
+- ALWAYS pass the table name as the first argument to `ctx.db.get`, `ctx.db.patch`, `ctx.db.replace`, and `ctx.db.delete`:
+```typescript
+// ✅ New (required)
+const user = await ctx.db.get("users", userId);
+await ctx.db.patch("users", userId, { name: "New name" });
+await ctx.db.replace("users", userId, { name: "New name", email: "a@b.com" });
+await ctx.db.delete("users", userId);
+
+// ❌ Old (deprecated — will break when BYO-ID ships)
+const user = await ctx.db.get(userId);
+await ctx.db.patch(userId, { name: "New name" });
+```
+
 ## Function guidelines
 ### New function syntax
 - ALWAYS use the new function syntax for Convex functions. For example:
@@ -238,14 +252,14 @@ export const g = query({
 
 ```ts
 import { v } from "convex/values";
-import { query, mutation } from "./_generated/server";
+import { query } from "./_generated/server";
 import { paginationOptsValidator } from "convex/server";
 export const listWithExtraArg = query({
     args: { paginationOpts: paginationOptsValidator, author: v.string() },
     handler: async (ctx, args) => {
         return await ctx.db
         .query("messages")
-        .filter((q) => q.eq(q.field("author"), args.author))
+        .withIndex("by_author", (q) => q.eq("author", args.author))
         .order("desc")
         .paginate(args.paginationOpts);
     },
@@ -254,10 +268,17 @@ export const listWithExtraArg = query({
 Note: `paginationOpts` is an object with the following properties:
 - `numItems`: the maximum number of documents to return (the validator is `v.number()`)
 - `cursor`: the cursor to use to fetch the next page of documents (the validator is `v.union(v.string(), v.null())`)
+- `maximumRowsRead` (optional): limit how many rows the database scans (useful for large tables)
+- `maximumBytesRead` (optional): limit how many bytes are read per page
 - A query that ends in `.paginate()` returns an object that has the following properties:
-                            - page (contains an array of documents that you fetches)
-                            - isDone (a boolean that represents whether or not this is the last page of documents)
-                            - continueCursor (a string that represents the cursor to use to fetch the next page of documents)
+  - page (contains an array of documents that you fetched)
+  - isDone (a boolean that represents whether or not this is the last page of documents)
+  - continueCursor (a string that represents the cursor to use to fetch the next page of documents)
+
+### Pagination limits
+- Transaction limits: 32,000 documents scanned, 16 MiB data read, 1 second execution time
+- Use `maximumRowsRead` and `maximumBytesRead` when paginating large tables to stay within limits
+- `.filter()` is ONLY acceptable with `.paginate()` to maintain correct page sizes — in all other cases use `.withIndex()`
 
 
 ## Validator guidelines
@@ -270,6 +291,10 @@ Note: `paginationOpts` is an object with the following properties:
 - System fields are automatically added to all documents and are prefixed with an underscore. The two system fields that are automatically added to all documents are `_creationTime` which has the validator `v.number()` and `_id` which has the validator `v.id(tableName)`.
 - Always include all index fields in the index name. For example, if an index is defined as `["field1", "field2"]`, the index name should be "by_field1_and_field2".
 - Index fields must be queried in the same order they are defined. If you want to be able to query by "field1" then "field2" and by "field2" then "field1", you must create separate indexes.
+- A compound index `by_foo_and_bar` already covers queries on `foo` alone — do NOT create a redundant `by_foo` index.
+- Do NOT store unbounded lists as arrays — create a separate table with a foreign key instead.
+- Separate high-churn data (typing indicators, online status) from stable data in different tables.
+- For schema changes: use widen-migrate-narrow — deploy widened schema, run migration, then deploy narrowed schema.
 
 ## Typescript guidelines
 - You can use the helper typescript type `Id` imported from './_generated/dataModel' to get the type of the id for a given table. For example if there is a table called 'users' you can use `Id<'users'>` to get the type of the id for that table.
@@ -285,7 +310,7 @@ export const exampleQuery = query({
         const idToUsername: Record<Id<"users">, string> = {};
         for (const userId of args.userIds) {
             const user = await ctx.db.get("users", userId);
-            if (user) {
+            if (user !== null) {
                 idToUsername[user._id] = user.username;
             }
         }
@@ -312,7 +337,10 @@ const messages = await ctx.db
 
 ## Query guidelines
 - Do NOT use `filter` in queries. Instead, define an index in the schema and use `withIndex` instead.
-- Convex queries do NOT support `.delete()`. Instead, `.collect()` the results, iterate over them, and call `ctx.db.delete(row._id)` on each result.
+- ALWAYS return bounded results — use `.take(n)` or `.paginate()`. Never use `.collect()` unless the result set is guaranteed to be small.
+- Never use `.collect().length` for counts — maintain denormalized counters instead.
+- Do NOT use `Date.now()` in queries — it breaks caching and causes stale results. Use boolean flags, client-passed timestamps, or denormalized fields.
+- Convex queries do NOT support `.delete()`. Instead, `.collect()` the results, iterate over them, and call `ctx.db.delete("table", row._id)` on each result.
 - Use `.unique()` to get a single document from a query. This method will throw an error if there are multiple documents that match the query.
 - When using async iteration, don't use `.collect()` or `.take(n)` on the result of a query. Instead, use the `for await (const row of query)` syntax.
 ### Ordering
@@ -322,12 +350,29 @@ const messages = await ctx.db
 
 
 ## Mutation guidelines
-- Use `ctx.db.replace` to fully replace an existing document. This method will throw an error if the document does not exist. Syntax: `await ctx.db.replace('tasks', taskId, { name: 'Buy milk', completed: false })`
-- Use `ctx.db.patch` to shallow merge updates into an existing document. This method will throw an error if the document does not exist. Syntax: `await ctx.db.patch('tasks', taskId, { completed: true })`
+- Use `ctx.db.replace` to fully replace an existing document. This method will throw an error if the document does not exist. Syntax: `await ctx.db.replace('users', userId, { name: 'Buy milk', completed: false })`
+- Use `ctx.db.patch` to shallow merge updates into an existing document. This method will throw an error if the document does not exist. Syntax: `await ctx.db.patch('users', userId, { completed: true })`
+- For bulk operations exceeding transaction limits (32K docs read, 16K written), process in batches and self-schedule: `ctx.scheduler.runAfter(0, internal.myModule.continueProcessing, { cursor })`
 
 ## Action guidelines
-- Always add `"use node";` to the top of files containing actions that use Node.js built-in modules.
+- Add `"use node";` ONLY to files that need Node.js built-in modules. Plain `fetch()` works without it.
 - Never use `ctx.db` inside of an action. Actions don't have access to the database.
+- Never mix `"use node"` actions with queries/mutations in the same file.
+- Prefer mutation-scheduled actions over direct client-to-action calls:
+```ts
+// ✅ Recommended: mutation schedules the action
+export const startTask = mutation({
+  args: { input: v.string() },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const id = await ctx.db.insert("tasks", { status: "pending", input: args.input });
+    await ctx.scheduler.runAfter(0, internal.tasks.processTask, { id });
+    return null;
+  },
+});
+```
+- Only use `ctx.runAction()` from an action when you need to cross runtimes (V8 ↔ Node.js). Otherwise, extract shared code into a helper function.
+- Actions have: 10-minute timeout, 64MB memory (Convex runtime) / 512MB (Node.js), up to 1,000 concurrent IO operations.
 - Below is an example of the syntax for an action:
 ```ts
 import { action } from "./_generated/server";
@@ -370,6 +415,11 @@ export default crons;
 - You can register Convex functions within `crons.ts` just like any other file.
 - If a cron calls an internal function, always import the `internal` object from '_generated/api', even if the internal function is registered in the same file.
 
+
+## Diagnostics
+
+- Use `convex_get_insights` to check deployment health before debugging code. Shows OCC conflicts, resource limit issues, and slow functions over the last 72 hours.
+- Use `convex_function_spec` to list all registered functions, their types, and validators.
 
 ## File storage guidelines
 - Convex includes file storage for large files like images, videos, and PDFs.
@@ -520,7 +570,7 @@ Internal Functions:
   "description": "This example shows how to build a chat app without authentication.",
   "version": "1.0.0",
   "dependencies": {
-    "convex": "^1.31.2",
+    "convex": "^1.34.0",
     "openai": "^4.79.0"
   },
   "devDependencies": {
@@ -628,11 +678,11 @@ export const sendMessage = mutation({
   },
   returns: v.null(),
   handler: async (ctx, args) => {
-    const channel = await ctx.db.get(args.channelId);
+    const channel = await ctx.db.get("channels", args.channelId);
     if (!channel) {
       throw new Error("Channel not found");
     }
-    const user = await ctx.db.get(args.authorId);
+    const user = await ctx.db.get("users", args.authorId);
     if (!user) {
       throw new Error("User not found");
     }
@@ -686,7 +736,7 @@ export const loadContext = internalQuery({
     }),
   ),
   handler: async (ctx, args) => {
-    const channel = await ctx.db.get(args.channelId);
+    const channel = await ctx.db.get("channels", args.channelId);
     if (!channel) {
       throw new Error("Channel not found");
     }
@@ -699,7 +749,7 @@ export const loadContext = internalQuery({
     const result = [];
     for (const message of messages) {
       if (message.authorId) {
-        const user = await ctx.db.get(message.authorId);
+        const user = await ctx.db.get("users", message.authorId);
         if (!user) {
           throw new Error("User not found");
         }

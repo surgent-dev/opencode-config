@@ -253,13 +253,20 @@ For detailed patterns, see `skill/convex-auth/SKILL.md`.
 | `dev-run` with `syncConvex: true` | After Convex schema/function changes |
 | `dev-logs` | Debug runtime errors, check server output |
 | `convex-logs` | Debug Convex function errors (use `success: true` for all logs). Fallback: `timeout 3 bunx convex logs --history 50 --success` |
+| `convex_get_insights` | **Check deployment health FIRST when debugging** — OCC conflicts, resource limits, slow functions (last 72h) |
+| `convex_function_spec` | List all registered functions with types, visibility, and validators |
 | `download-to-repo` | Download images/assets to project |
 | `write-client-env` | Write client-side env vars to `.env` |
-| `convex_create_project` | Initialize new Convex project |
+| `convex_create_project` | Initialize new Convex project (supports `region` param for EU hosting) |
 | `convex_set_env_vars` | Set API keys and secrets |
 | `convex_list_env_vars` | Check existing env vars |
+| `convex_clone_env_vars` | Copy env vars from dev to prod (or vice versa) before first deploy |
+| `convex_env_diff` | Compare env vars between dev and prod — catch missing vars before deploy |
+| `convex_list_deployments` | List all deployments (dev, prod, preview) for the project |
+| `convex_list_regions` | List available Convex hosting regions |
 | `convex_call_query` | Test a query |
 | `convex_call_mutation` | Test a mutation |
+| `convex_call_action` | Test an action (external API calls, side effects) |
 
 ---
 
@@ -285,9 +292,18 @@ Users should always see what went wrong — never silent failures.
 
 ## Debugging
 
-**Debug order:** `dev-run` sync output → `convex-logs` → `dev-logs` → frontend
+**Debug order:** `convex_get_insights` → `dev-run` sync output → `convex-logs` → `dev-logs` → frontend
+
+Always check insights first — OCC conflicts and resource limits are invisible in logs but cause "random" failures.
 
 Auth stuck? Check backend config first (`auth.config.ts`), not UI.
+
+## Deploying to Production
+
+Before promoting to production:
+1. Run `convex_env_diff` — check what variables are missing in prod
+2. Run `convex_clone_env_vars` — copy server vars from dev to prod (env-specific vars like SITE_URL are auto-excluded)
+3. Promote via the deploy endpoint
 
 ## Rules
 

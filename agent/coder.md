@@ -55,7 +55,7 @@ import { v } from "convex/values";
 export const example = query({
   args: { id: v.id("items") },
   handler: async (ctx, args) => {
-    return await ctx.db.get(args.id);
+    return await ctx.db.get("items", args.id);
   },
 });
 ```
@@ -123,13 +123,20 @@ throw new ConvexError("ITEM_NOT_FOUND")
 - **Always** run `bun run dev:convex` after creating/modifying Convex files — this syncs and generates `convex/_generated/`
 - **Never** run `dev-run` — the orchestrator handles build and dev server
 - **Always** use validators for args
+- **Always** pass table name to `ctx.db.get`, `ctx.db.patch`, `ctx.db.replace`, `ctx.db.delete`: `ctx.db.get("users", userId)` not `ctx.db.get(userId)`
 - **Never** add return validators initially
 - **Never** add built-in indexes (`by_id`, `by_creation_time`)
+- **Never** create redundant indexes — `by_foo_and_bar` already covers queries on `foo` alone
+- **Never** use `Date.now()` in queries — breaks caching. Use boolean flags or client-passed timestamps
+- **Never** use `.collect()` without bounds — always `.take(n)` or `.paginate()`
+- **Never** store unbounded arrays — create a child table with foreign key instead
 - Use `.withIndex()` not `.filter()`
 - Use `Id<"table">` for document IDs
-- Actions: add `"use node";`, no `ctx.db` access
+- Actions: add `"use node";` only when using Node.js builtins (plain `fetch()` works without it), no `ctx.db` access
+- Don't mix `"use node"` actions with queries/mutations in the same file
 - Store `Id<"_storage">` not URLs for files
 - **Always** throw user-friendly error messages (shown in UI toasts)
+- For bulk ops exceeding transaction limits: process a batch, then `ctx.scheduler.runAfter(0, ...)` to self-schedule
 
 ## Limits to Design Around
 
@@ -174,21 +181,28 @@ Also update `convex/tsconfig.json`: `"moduleResolution": "Bundler"`, `"skipLibCh
 
 ## Debugging Protocol
 
-**When something "doesn't work" after auth/config changes:**
+**When something "doesn't work":**
 
-1. **Always check Convex push output first** — config errors only appear there, not in runtime logs
-2. **Run `convex-logs`** — look for `InvalidSecret`, `InvalidAuthConfig`, or silent failures
-3. **Don't assume frontend bug** — if auth UI is stuck, it's usually backend config (especially `auth.config.ts`)
-4. **Common auth trap:** Auth can "seem to succeed" client-side while server config is invalid — always verify Convex sync succeeded
+1. **Run `convex_get_insights` first** — shows OCC conflicts, resource limits, slow functions for the last 72 hours. Don't blame code before checking infrastructure.
+2. **Check Convex push output** — config errors only appear there, not in runtime logs
+3. **Run `convex-logs`** — look for `InvalidSecret`, `InvalidAuthConfig`, or silent failures
+4. **Use `convex_function_spec`** — verify the function is actually registered and has the expected type
+5. **Don't assume frontend bug** — if auth UI is stuck, it's usually backend config (especially `auth.config.ts`)
+6. **Common auth trap:** Auth can "seem to succeed" client-side while server config is invalid — always verify Convex sync succeeded
 
 ## Tools
 
 | Tool | When to Use |
 |------|-------------|
 | `convex-logs` | Debug function errors (use `success: true` for all logs). Fallback: `timeout 3 bunx convex logs --history 50 --success` |
+| `convex_get_insights` | Check deployment health FIRST when debugging (OCC conflicts, resource limits, slow functions) |
+| `convex_function_spec` | List all registered functions with types, visibility, and validators |
+| `convex_call_action` | Execute a Convex action (external API calls, side effects) |
 | `convex_create_project` | Initialize new Convex project |
 | `convex_set_env_vars` | Set API keys and secrets |
 | `convex_list_env_vars` | Check existing env vars |
+| `convex_clone_env_vars` | Copy env vars between dev/prod |
+| `convex_env_diff` | Compare env vars between dev and prod |
 
 ## Payment Integration (Surpay)
 

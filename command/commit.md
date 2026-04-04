@@ -11,12 +11,15 @@ docs:
 tui:
 core:
 ci:
+backend:
 ignore:
 wip:
 
 For anything in the packages/web use the docs: prefix.
 
 For anything in the packages/app use the ignore: prefix.
+
+For anything in convex/ (schemas, functions, auth) use the backend: prefix.
 
 prefer to explain WHY something was done from an end user perspective instead of
 WHAT was done.
