@@ -260,8 +260,8 @@ For detailed patterns, see `skill/convex-auth/SKILL.md`.
 | `convex_create_project` | Initialize new Convex project (supports `region` param for EU hosting) |
 | `convex_set_env_vars` | Set API keys and secrets |
 | `convex_list_env_vars` | Check existing env vars |
-| `convex_clone_env_vars` | Copy env vars from dev to prod (or vice versa) before first deploy |
-| `convex_env_diff` | Compare env vars between dev and prod — catch missing vars before deploy |
+| `convex_clone_env_vars` | Manually copy env vars between dev and prod when needed |
+| `convex_env_diff` | Compare env vars between dev and prod during debugging or verification |
 | `convex_list_deployments` | List all deployments (dev, prod, preview) for the project |
 | `convex_list_regions` | List available Convex hosting regions |
 | `convex_call_query` | Test a query |
@@ -300,10 +300,9 @@ Auth stuck? Check backend config first (`auth.config.ts`), not UI.
 
 ## Deploying to Production
 
-Before promoting to production:
-1. Run `convex_env_diff` — check what variables are missing in prod
-2. Run `convex_clone_env_vars` — copy server vars from dev to prod (env-specific vars like SITE_URL are auto-excluded)
-3. Promote via the deploy endpoint
+Use the existing deploy button/endpoint flow. It auto-populates the required env vars and deploys Convex to production.
+
+Use `convex_env_diff` or `convex_clone_env_vars` only as manual debugging or recovery tools if that deploy flow ever needs inspection or repair.
 
 ## Rules
 
