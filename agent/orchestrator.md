@@ -76,7 +76,7 @@ src/
 ├── lib/                  # cn(), errorReporter
 └── index.css             # Tailwind + theme variables (OKLCH)
 
-convex/                   # Created after convex_create_project
+convex/                   # Created after surgent_convex_create_project
 ├── schema.ts             # Database schema
 ├── pay.ts                # Payment integration (after auth)
 └── auth.ts               # Auth exports (after auth setup)
@@ -227,7 +227,7 @@ Single-feature apps go on the home page (`/`) — don't create sub-routes like `
 
 **Default: Email + Password.** Don't ask the user — just use it.
 
-**Auth keys (SITE_URL, JWT_PRIVATE_KEY, JWKS) are auto-configured in convex** when `convex_create_project` runs.
+**Auth keys (SITE_URL, JWT_PRIVATE_KEY, JWKS) are auto-configured in convex** when `surgent_convex_create_project` runs.
 
 **Setup:**
 1. `@coder`: Install packages and create auth files
@@ -252,21 +252,18 @@ For detailed patterns, see `skill/convex-auth/SKILL.md`.
 | `dev-run` | Build project and restart dev server |
 | `dev-run` with `syncConvex: true` | After Convex schema/function changes |
 | `dev-logs` | Debug runtime errors, check server output |
-| `convex-logs` | Debug Convex function errors (use `success: true` for all logs). Fallback: `timeout 3 bunx convex logs --history 50 --success` |
-| `convex_get_insights` | **Check deployment health FIRST when debugging** — OCC conflicts, resource limits, slow functions (last 72h) |
-| `convex_function_spec` | List all registered functions with types, visibility, and validators |
+| `convex_logs` | Debug recent Convex executions with structured log entries |
+| `convex_insights` | **Check deployment health FIRST when debugging** — OCC conflicts, resource limits, slow functions (last 72h) |
+| `convex_functionSpec` | List all registered functions with types, visibility, and validators |
+| `convex_status` | Discover/select the current Convex deployment before deeper runtime work |
+| `convex_run` | Execute a deployed Convex query, mutation, or action |
+| `convex_tables` | Inspect tables and schema/inferred metadata |
+| `convex_data` | Page through documents in a table |
+| `convex_envList` | Read deployment environment variable names |
+| `convex_envGet` | Read a specific deployment environment variable |
 | `download-to-repo` | Download images/assets to project |
 | `write-client-env` | Write client-side env vars to `.env` |
-| `convex_create_project` | Initialize new Convex project (supports `region` param for EU hosting) |
-| `convex_set_env_vars` | Set API keys and secrets |
-| `convex_list_env_vars` | Check existing env vars |
-| `convex_clone_env_vars` | Manually copy env vars between dev and prod when needed |
-| `convex_env_diff` | Compare env vars between dev and prod during debugging or verification |
-| `convex_list_deployments` | List all deployments (dev, prod, preview) for the project |
-| `convex_list_regions` | List available Convex hosting regions |
-| `convex_call_query` | Test a query |
-| `convex_call_mutation` | Test a mutation |
-| `convex_call_action` | Test an action (external API calls, side effects) |
+| `surgent_convex_create_project` | Initialize a Surgent-managed Convex project and seed auth/env vars |
 
 ---
 
@@ -292,7 +289,7 @@ Users should always see what went wrong — never silent failures.
 
 ## Debugging
 
-**Debug order:** `convex_get_insights` → `dev-run` sync output → `convex-logs` → `dev-logs` → frontend
+**Debug order:** `convex_status` → `convex_insights` → `dev-run` sync output → `convex_logs` → `dev-logs` → frontend
 
 Always check insights first — OCC conflicts and resource limits are invisible in logs but cause "random" failures.
 
@@ -302,7 +299,7 @@ Auth stuck? Check backend config first (`auth.config.ts`), not UI.
 
 Use the existing deploy button/endpoint flow. It auto-populates the required env vars and deploys Convex to production.
 
-Use `convex_env_diff` or `convex_clone_env_vars` only as manual debugging or recovery tools if that deploy flow ever needs inspection or repair.
+Use the Surgent deploy flow for production. Reach for `convex_envList` / `convex_envGet` only when you need to inspect deployment state during debugging.
 
 ## Rules
 

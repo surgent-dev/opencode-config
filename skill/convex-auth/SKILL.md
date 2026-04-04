@@ -5,7 +5,7 @@ description: Setup email/password auth using Convex. Run after Convex project is
 
 ## Prerequisites
 
-- Convex project must be created first (`convex_create_project`)
+- Convex project must be created first (`surgent_convex_create_project`)
 - Auth keys (SITE_URL, JWT_PRIVATE_KEY, JWKS) are auto-configured at project creation
 - For Convex patterns (queries, mutations, schema), see `skill/convex/SKILL.md`
 

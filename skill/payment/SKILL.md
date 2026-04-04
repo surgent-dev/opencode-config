@@ -5,7 +5,7 @@ description: Payment integration via Surpay. Requires Convex. Auth optional (use
 
 ## Prerequisites
 
-- Convex project initialized (`convex_create_project` called)
+- Convex project initialized (`surgent_convex_create_project` called)
 - `SURGENT_API_KEY` set in Convex (auto-configured by setup)
 - ConvexProvider in main.tsx (see `skill/convex/SKILL.md` for setup)
 

@@ -146,7 +146,7 @@ throw new ConvexError("ITEM_NOT_FOUND")
 
 ## Authentication (Convex Auth)
 
-**Auth keys are auto-generated** when `convex_create_project` runs. No wizard needed.
+**Auth keys are auto-generated** when `surgent_convex_create_project` runs. No wizard needed.
 
 **Setup:** `bun add @convex-dev/auth @auth/core@0.37.0` then create these files:
 
@@ -183,26 +183,28 @@ Also update `convex/tsconfig.json`: `"moduleResolution": "Bundler"`, `"skipLibCh
 
 **When something "doesn't work":**
 
-1. **Run `convex_get_insights` first** — shows OCC conflicts, resource limits, slow functions for the last 72 hours. Don't blame code before checking infrastructure.
-2. **Check Convex push output** — config errors only appear there, not in runtime logs
-3. **Run `convex-logs`** — look for `InvalidSecret`, `InvalidAuthConfig`, or silent failures
-4. **Use `convex_function_spec`** — verify the function is actually registered and has the expected type
-5. **Don't assume frontend bug** — if auth UI is stuck, it's usually backend config (especially `auth.config.ts`)
-6. **Common auth trap:** Auth can "seem to succeed" client-side while server config is invalid — always verify Convex sync succeeded
+1. **Run `convex_status` first** — confirm the deployment selector and current target before deeper debugging.
+2. **Run `convex_insights`** — shows OCC conflicts, resource limits, slow functions for the last 72 hours. Don't blame code before checking infrastructure.
+3. **Check Convex push output** — config errors only appear there, not in runtime logs
+4. **Run `convex_logs`** — look for `InvalidSecret`, `InvalidAuthConfig`, or silent failures
+5. **Use `convex_functionSpec`** — verify the function is actually registered and has the expected type
+6. **Don't assume frontend bug** — if auth UI is stuck, it's usually backend config (especially `auth.config.ts`)
+7. **Common auth trap:** Auth can "seem to succeed" client-side while server config is invalid — always verify Convex sync succeeded
 
 ## Tools
 
 | Tool | When to Use |
 |------|-------------|
-| `convex-logs` | Debug function errors (use `success: true` for all logs). Fallback: `timeout 3 bunx convex logs --history 50 --success` |
-| `convex_get_insights` | Check deployment health FIRST when debugging (OCC conflicts, resource limits, slow functions) |
-| `convex_function_spec` | List all registered functions with types, visibility, and validators |
-| `convex_call_action` | Execute a Convex action (external API calls, side effects) |
-| `convex_create_project` | Initialize new Convex project |
-| `convex_set_env_vars` | Set API keys and secrets |
-| `convex_list_env_vars` | Check existing env vars |
-| `convex_clone_env_vars` | Copy env vars between dev/prod |
-| `convex_env_diff` | Compare env vars between dev and prod |
+| `convex_logs` | Debug recent Convex executions with structured log entries |
+| `convex_insights` | Check deployment health FIRST when debugging (OCC conflicts, resource limits, slow functions) |
+| `convex_functionSpec` | List all registered functions with types, visibility, and validators |
+| `convex_status` | Discover/select the current Convex deployment before deeper runtime work |
+| `convex_run` | Execute a deployed Convex query, mutation, or action |
+| `convex_tables` | Inspect tables and schema/inferred metadata |
+| `convex_data` | Page through documents in a table |
+| `convex_envList` | Read deployment environment variable names |
+| `convex_envGet` | Read a specific deployment environment variable |
+| `surgent_convex_create_project` | Initialize a Surgent-managed Convex project and seed auth/env vars |
 
 ## Payment Integration (Surpay)
 

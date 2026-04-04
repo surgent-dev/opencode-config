@@ -6,8 +6,9 @@ description: "Use before designing or implementing Convex backend changes: auth,
 # Convex guidelines
 
 ## Project setup
-- Use `convex_create_project` tool to initialize a new Convex project
+- Use `surgent_convex_create_project` to initialize a new Surgent-managed Convex project
 - This auto-configures auth keys (SITE_URL, JWT_PRIVATE_KEY, JWKS) on the Convex deployment
+- Use the official local `convex_*` MCP tools for day-to-day runtime work: `convex_status`, `convex_run`, `convex_logs`, `convex_functionSpec`, `convex_insights`, `convex_tables`, `convex_data`
 - For authentication, see `skill/convex-auth/SKILL.md`
 
 ### Required files when creating convex folder
@@ -418,8 +419,10 @@ export default crons;
 
 ## Diagnostics
 
-- Use `convex_get_insights` to check deployment health before debugging code. Shows OCC conflicts, resource limit issues, and slow functions over the last 72 hours.
-- Use `convex_function_spec` to list all registered functions, their types, and validators.
+- Use `convex_status` first to confirm the current deployment target and available selectors.
+- Use `convex_insights` to check deployment health before debugging code. Shows OCC conflicts, resource limit issues, and slow functions over the last 72 hours.
+- Use `convex_functionSpec` to list all registered functions, their types, and validators.
+- Use `convex_logs` for recent function executions and `convex_run` to exercise deployed queries, mutations, and actions.
 
 ## File storage guidelines
 - Convex includes file storage for large files like images, videos, and PDFs.

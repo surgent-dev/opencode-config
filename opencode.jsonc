@@ -38,6 +38,21 @@
   },
   "mcp": {
     "convex": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "convex@latest",
+        "mcp",
+        "start",
+        "--project-dir",
+        ".",
+        "--disable-tools",
+        "envSet,envRemove"
+      ],
+      "enabled": true
+    },
+    "surgent_convex": {
       "type": "remote",
       "url": "{env:SURGENT_BASE_URL}/api/mcp/convex",
       "oauth": false,
