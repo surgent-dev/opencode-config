@@ -9,7 +9,7 @@ Usage:
 Options:
   --target DIR      Local checkout path (default: $OPENCODE_CONFIG_DIR or ~/opencode-config)
   --no-rc           Do not modify shell rc file
-  --disable-local   Rename ./packages/opencode/.opencode to avoid local overrides
+  --disable-local   Rename ./.opencode in the current directory to avoid local overrides
 
 Env:
   OPENCODE_CONFIG_REPO  Default repo URL
@@ -93,8 +93,7 @@ if [[ "$UPDATE_RC" == "true" ]]; then
 fi
 
 if [[ "$DISABLE_LOCAL" == "true" ]]; then
-  SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-  LOCAL_OPENCODE="$SCRIPT_DIR/packages/opencode/.opencode"
+  LOCAL_OPENCODE="$PWD/.opencode"
   if [[ -d "$LOCAL_OPENCODE" ]]; then
     mv "$LOCAL_OPENCODE" "${LOCAL_OPENCODE}.disabled.$(date +%Y%m%d-%H%M%S)"
     echo "Disabled local .opencode at $LOCAL_OPENCODE"
