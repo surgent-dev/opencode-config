@@ -11,6 +11,12 @@
         "apiKey": "{env:OPENCODE_API_KEY}"
       },
       "models": {
+        "glm-5.1": {
+          "name": "GLM 5.1"
+        },
+        "glm-5": {
+          "name": "GLM 5"
+        },
         "gpt-5.2-codex": {
           "name": "GPT 5.2 Codex"
         },
