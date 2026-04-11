@@ -244,6 +244,7 @@ const plugin: Plugin = async (input) => {
   }
 
   // Bootstrap: seed all existing sessions on first connect (no-op if already seeded)
+  const bootstrapLimit = 4000
   ;(async () => {
     try {
       const sessions: any[] = await localGet('/session').catch(() => [])
@@ -271,7 +272,15 @@ const plugin: Plugin = async (input) => {
       }
 
       const safe = ops.filter((o) => JSON.stringify(o.payload).length <= bytes)
-      await post('/api/sync/bootstrap', { ops: safe })
+
+      // Send in chunks to stay under the 5000-op backend limit
+      for (let i = 0; i < safe.length; i += bootstrapLimit) {
+        const ok = await post('/api/sync/bootstrap', { ops: safe.slice(i, i + bootstrapLimit) })
+        if (!ok) {
+          await log('bootstrap rejected', { offset: i, total: safe.length })
+          return
+        }
+      }
     } catch (err) {
       await log('bootstrap failed', { error: err instanceof Error ? err.message : String(err) })
     }
