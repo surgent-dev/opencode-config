@@ -243,6 +243,40 @@ const plugin: Plugin = async (input) => {
     }
   }
 
+  // Bootstrap: seed all existing sessions on first connect (no-op if already seeded)
+  ;(async () => {
+    try {
+      const sessions: any[] = await localGet('/session').catch(() => [])
+      if (!sessions.length) return
+
+      const ops: Write[] = []
+      for (const session of sessions) {
+        const id = session.id
+        const [messages, todos, diff] = await Promise.all([
+          localGet(`/session/${id}/message`).then((d: any) => d ?? []).catch(() => []),
+          localGet(`/session/${id}/todo`).then((d: any) => d ?? []).catch(() => []),
+          localGet(`/session/${id}/diff`).then((d: any) => d ?? []).catch(() => []),
+        ])
+
+        ops.push({ entity: 'session', id, payload: session })
+        for (const item of Array.isArray(messages) ? messages : []) {
+          ops.push({ entity: 'message', id: item.info.id, session_id: id, payload: item.info })
+          for (const p of item.parts ?? []) {
+            const safe = p.type === 'file' && p.url?.startsWith('data:') ? { ...p, url: 'data:,' } : p
+            ops.push({ entity: 'part', id: safe.id, session_id: id, message_id: safe.messageID, payload: safe })
+          }
+        }
+        ops.push({ entity: 'todo', id, payload: todos })
+        ops.push({ entity: 'session_diff', id, payload: JSON.stringify(diff).length > bytes ? [] : diff })
+      }
+
+      const safe = ops.filter((o) => JSON.stringify(o.payload).length <= bytes)
+      await post('/api/sync/bootstrap', { ops: safe })
+    } catch (err) {
+      await log('bootstrap failed', { error: err instanceof Error ? err.message : String(err) })
+    }
+  })()
+
   return {
     event: ({ event }) => sync(event),
   }
