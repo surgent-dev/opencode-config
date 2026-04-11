@@ -174,7 +174,6 @@ const plugin: Plugin = async (input) => {
     const next = (async () => {
       clear(id)
       const write = item.dirty
-      let retry = false
 
       try {
         const ops = [...item.drop.values()]
@@ -190,13 +189,12 @@ const plugin: Plugin = async (input) => {
         if (ok) return
         item.dirty = true
       } catch (err) {
-        retry = true
         if (write) item.dirty = true
         await log('transient push failure', { error: err instanceof Error ? err.message : String(err) })
       } finally {
         item.run = undefined
-        if (retry && (item.dirty || item.drop.size)) plan(id)
-        prune(id)
+        if (item.dirty || item.drop.size) plan(id)
+        else prune(id)
       }
     })()
 
