@@ -29,6 +29,7 @@ const plugin: Plugin = async (input) => {
   const key = Bun.env.SURGENT_API_KEY
   if (!base || !key) return {}
 
+  const serverUrl = input.serverUrl?.href ?? 'http://localhost:4096'
   const state = new Map<string, State>()
   const log = (message: string, extra?: Record<string, unknown>) =>
     input.client.app
@@ -57,6 +58,12 @@ const plugin: Plugin = async (input) => {
     if (res.status === 429 || res.status >= 500) throw new Error(err)
     await log(err)
     return false
+  }
+
+  async function localGet(path: string) {
+    const res = await fetch(new URL(path, serverUrl))
+    if (!res.ok) throw new Error(`${res.status} ${path}`)
+    return res.json()
   }
 
   const load = (id: string) => {
@@ -118,35 +125,32 @@ const plugin: Plugin = async (input) => {
   }
 
   const push = async (id: string) => {
-    const [session, messages] = await Promise.all([
-      input.client.session.get({ sessionID: id }, { throwOnError: true }).then((x) => x.data),
-      input.client.session.messages({ sessionID: id }, { throwOnError: true }).then((x) => x.data ?? []),
+    const [session, messages, todos, diff] = await Promise.all([
+      localGet(`/session/${id}`) as Promise<any>,
+      localGet(`/session/${id}/message`).then((d: any) => d ?? []).catch(() => []),
+      localGet(`/session/${id}/todo`).then((d: any) => d ?? []).catch(() => []),
+      localGet(`/session/${id}/diff`).then((d: any) => d ?? []).catch(() => []),
     ])
     if (!session) throw new Error(`Missing session ${id}`)
 
-    const [todos, diff] = await Promise.all([
-      input.client.session.todo({ sessionID: id }).then((x) => x.data ?? []).catch(() => []),
-      input.client.session.diff({ sessionID: id }).then((x) => x.data ?? []).catch(() => []),
-    ])
-
-    const part = (item: (typeof messages)[number]['parts'][number]) => {
+    const part = (item: any) => {
       if (item.type !== 'file') return item
-      if (!item.url.startsWith('data:')) return item
+      if (!item.url?.startsWith('data:')) return item
       return { ...item, url: 'data:,' }
     }
 
     const raw: Write[] = [
       { entity: 'session', id: session.id, payload: session },
-      ...messages.flatMap((item) => [
+      ...(Array.isArray(messages) ? messages : []).flatMap((item: any) => [
         { entity: 'message' as const, id: item.info.id, session_id: id, payload: item.info },
-        ...item.parts.map((value) => {
-          const item = part(value)
+        ...(item.parts ?? []).map((value: any) => {
+          const p = part(value)
           return {
             entity: 'part' as const,
-            id: item.id,
+            id: p.id,
             session_id: id,
-            message_id: item.messageID,
-            payload: item,
+            message_id: p.messageID,
+            payload: p,
           }
         }),
       ]),
