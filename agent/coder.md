@@ -1,7 +1,7 @@
 ---
 description: Full-stack developer - Convex, TypeScript, APIs, backend logic, database
 mode: subagent
-model: opencode/claude-opus-4-5
+model: opencode/glm-5.1
 temperature: 0.2
 maxSteps: 50
 options:

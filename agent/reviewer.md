@@ -1,7 +1,7 @@
 ---
 description: Code reviewer - bugs, security, best practices, style, performance, test coverage
 mode: subagent
-model: opencode/gpt-5.2-codex
+model: opencode/gpt-5.4
 options:
   reasoningEffort: xhigh
 temperature: 0.5
