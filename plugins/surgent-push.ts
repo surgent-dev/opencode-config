@@ -118,13 +118,16 @@ const plugin: Plugin = async (input) => {
   }
 
   const push = async (id: string) => {
-    const [session, messages, todos, diff] = await Promise.all([
+    const [session, messages] = await Promise.all([
       input.client.session.get({ sessionID: id }, { throwOnError: true }).then((x) => x.data),
       input.client.session.messages({ sessionID: id }, { throwOnError: true }).then((x) => x.data ?? []),
-      input.client.session.todo({ sessionID: id }, { throwOnError: true }).then((x) => x.data ?? []),
-      input.client.session.diff({ sessionID: id }, { throwOnError: true }).then((x) => x.data ?? []),
     ])
     if (!session) throw new Error(`Missing session ${id}`)
+
+    const [todos, diff] = await Promise.all([
+      input.client.session.todo({ sessionID: id }).then((x) => x.data ?? []).catch(() => []),
+      input.client.session.diff({ sessionID: id }).then((x) => x.data ?? []).catch(() => []),
+    ])
 
     const part = (item: (typeof messages)[number]['parts'][number]) => {
       if (item.type !== 'file') return item
