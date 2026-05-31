@@ -17,7 +17,7 @@ NOTE: These models are subject to change, feel free to pick what works for you.
 | **@frontend** | `gemini-3-pro-preview` | UI components, styling |
 | **@reviewer** | `gpt-5.2` | Code review, security, best practices |
 | **@explorer** | `gpt-5.2` | Codebase search, context gathering |
-| **@research** | `glm-4.7-free` | Web research, external docs |
+| **@research** | `gpt-5.5` | Web research, external docs |
 | **@writer** | `gemini-3-flash-preview` | Documentation |
 
 ## How It Works
