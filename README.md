@@ -13,12 +13,10 @@ NOTE: These models are subject to change, feel free to pick what works for you.
 | Agent | Model | Role |
 | :--- | :--- | :--- |
 | **@orchestrator** | `claude-opus-4-5` | Plans, coordinates, delegates |
-| **@coder** | `gpt-5.2-codex` | Backend logic, algorithms, APIs |
-| **@frontend** | `gemini-3-pro-preview` | UI components, styling |
-| **@reviewer** | `gpt-5.2` | Code review, security, best practices |
-| **@explorer** | `gpt-5.2` | Codebase search, context gathering |
-| **@research** | `gpt-5.5` | Web research, external docs |
-| **@writer** | `gemini-3-flash-preview` | Documentation |
+| **@coder** | `gpt-5.5` | Backend logic, algorithms, APIs |
+| **@frontend** | `gpt-5.5` | UI components, styling |
+| **@reviewer** | `gpt-5.5` | Code review, security, best practices |
+| **@explore** | `gpt-5.5` | Codebase search, context gathering |
 
 ## How It Works
 
@@ -43,9 +41,7 @@ The orchestrator delegates automatically. You can also call agents directly:
 @coder Implement JWT validation middleware
 @frontend Create a responsive Navbar with Tailwind
 @reviewer Review src/auth/ for security issues
-@explorer Find all usages of useAuth hook
-@research Find Surgent Pay API docs for checkout
-@writer Document the API endpoints
+@explore Find all usages of useAuth hook
 ```
 
 ## Customization
