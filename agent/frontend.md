@@ -1,7 +1,7 @@
 ---
 description: Frontend specialist - React, Tailwind, shadcn/ui, UI components, styling
 mode: subagent
-model: opencode/gpt-5.5
+model: opencode/gpt-5.4-mini
 temperature: 0.7
 maxSteps: 30
 tools:

@@ -1,10 +1,10 @@
 ---
 description: Coordinates tasks - delegates to @coder (backend) and @frontend (UI)
 mode: primary
-model: opencode/claude-opus-4-5
+model: opencode/gpt-5.4-mini
 temperature: 0.7
 options:
-  reasoningEffort: xhigh
+  reasoningEffort: medium
 tools:
   read: true
   glob: true

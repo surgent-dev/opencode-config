@@ -12,11 +12,11 @@ NOTE: These models are subject to change, feel free to pick what works for you.
 
 | Agent | Model | Role |
 | :--- | :--- | :--- |
-| **@orchestrator** | `claude-opus-4-5` | Plans, coordinates, delegates |
-| **@coder** | `gpt-5.5` | Backend logic, algorithms, APIs |
-| **@frontend** | `gpt-5.5` | UI components, styling |
-| **@reviewer** | `gpt-5.5` | Code review, security, best practices |
-| **@explore** | `gpt-5.5` | Codebase search, context gathering |
+| **@orchestrator** | `gpt-5.4-mini` | Plans, coordinates, delegates |
+| **@coder** | `gpt-5.4-mini` | Backend logic, algorithms, APIs |
+| **@frontend** | `gpt-5.4-mini` | UI components, styling |
+| **@reviewer** | `gpt-5.4-mini` | Code review, security, best practices |
+| **@explore** | `gpt-5.4-mini` | Codebase search, context gathering |
 
 ## How It Works
 
