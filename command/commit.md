@@ -1,6 +1,6 @@
 ---
 description: git commit and push
-model: opencode/gpt-5.4-mini
+model: opencode/gpt-5.5
 subtask: true
 ---
 
